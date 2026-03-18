@@ -10,7 +10,7 @@ const About = lazy(() => import('./pages/about-us'))
 
 
 createRoot(document.getElementById('root')!).render(
-  <BrowserRouter basename="/sport-hub">
+  <BrowserRouter basename="/revolution-crit">
     <div className="min-h-screen bg-gray-50">
     <Header />
     <Routes>
