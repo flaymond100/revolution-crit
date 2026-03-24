@@ -1,7 +1,29 @@
-import './App.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import './App.css';
+import { AppLayout } from './components/AppLayout';
+import { HomePage } from './pages/HomePage';
+import {
+  AboutPage,
+  CategoriesPage,
+  ContactPage,
+  FaqPage,
+  GalleryPage,
+  GalleryRacePage,
+  GallerySeasonPage,
+  ImprintPage,
+  PartnersPage,
+  PrivacyPage,
+  RaceDetailPage,
+  RacesPage,
+  ResultsPage,
+  ResultsRacePage,
+  ResultsSeasonPage,
+  TermsPage,
+  TrainingCampPage,
+  WithdrawalPage,
+} from './pages/RoutePages';
 
-// Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -14,14 +36,30 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 py-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Revolution Crit</h1>
-            <p className="text-gray-600 mt-2">Welcome</p>
-          </div>
-          </div>
-        </div>
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route element={<HomePage />} path="/" />
+          <Route element={<RacesPage />} path="/races" />
+          <Route element={<RaceDetailPage />} path="/races/:slug" />
+          <Route element={<ResultsPage />} path="/results" />
+          <Route element={<ResultsSeasonPage />} path="/results/:season" />
+          <Route element={<ResultsRacePage />} path="/results/:season/:raceSlug" />
+          <Route element={<CategoriesPage />} path="/categories" />
+          <Route element={<GalleryPage />} path="/gallery" />
+          <Route element={<GallerySeasonPage />} path="/gallery/:season" />
+          <Route element={<GalleryRacePage />} path="/gallery/:season/:raceSlug" />
+          <Route element={<AboutPage />} path="/about" />
+          <Route element={<TrainingCampPage />} path="/training-camp" />
+          <Route element={<PartnersPage />} path="/partners" />
+          <Route element={<ContactPage />} path="/contact" />
+          <Route element={<FaqPage />} path="/faq" />
+          <Route element={<ImprintPage />} path="/imprint" />
+          <Route element={<PrivacyPage />} path="/privacy" />
+          <Route element={<TermsPage />} path="/terms" />
+          <Route element={<WithdrawalPage />} path="/withdrawal" />
+          <Route element={<Navigate replace to="/" />} path="*" />
+        </Route>
+      </Routes>
     </QueryClientProvider>
   );
 }
