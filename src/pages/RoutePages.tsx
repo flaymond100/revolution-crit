@@ -1,8 +1,11 @@
+import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import { RaceCard } from '../components/RaceCard';
 import { RaceTable } from '../components/RaceTable';
 import { SectionIntro } from '../components/SectionIntro';
 import { raceCalendar } from '../data/races';
+import { fetchRaceCalendars } from '../lib/raceCalendar';
+import { toFallbackRaceCalendars, toRaceItems } from '../lib/racePresentation';
 
 type PlaceholderPageProps = {
   eyebrow: string;
@@ -47,8 +50,13 @@ function PlaceholderPage({ eyebrow, title, description, highlights, ctaLabel, ct
 }
 
 export function RacesPage() {
-  const isLoading = false;
-  const races = raceCalendar;
+  const { data, isLoading } = useQuery({
+    queryKey: ['race-calendar'],
+    queryFn: fetchRaceCalendars,
+  });
+
+  const tableRaces = data && data.length > 0 ? data : toFallbackRaceCalendars(raceCalendar);
+  const races = data && data.length > 0 ? toRaceItems(data) : raceCalendar;
 
   if (isLoading) {
     return (
@@ -126,7 +134,7 @@ export function RacesPage() {
           title="Compare all rounds quickly."
           description="The table is the primary event discovery view on larger screens: date, city, race identity, and registration status in one pass."
         />
-        <RaceTable races={races} />
+        <RaceTable races={tableRaces} />
       </section>
 
       <section className="space-y-6" aria-label="Race cards">

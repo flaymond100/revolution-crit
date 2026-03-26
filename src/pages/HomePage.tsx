@@ -1,10 +1,11 @@
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { RaceCard } from '../components/RaceCard';
 import { SectionIntro } from '../components/SectionIntro';
 import { raceCalendar } from '../data/races';
+import { fetchRaceCalendars } from '../lib/raceCalendar';
+import { toFallbackRaceCalendars, toRaceItems } from '../lib/racePresentation';
 import { RaceTable } from '../components/RaceTable';
-
-const upcomingRaces = raceCalendar.slice(0, 3);
 
 const categories = [
   {
@@ -83,6 +84,16 @@ const partners = [
 ];
 
 export function HomePage() {
+  const { data: remoteRaces } = useQuery({
+    queryKey: ['race-calendar'],
+    queryFn: fetchRaceCalendars,
+  });
+
+  const tableRaces = remoteRaces && remoteRaces.length > 0 ? remoteRaces : toFallbackRaceCalendars(raceCalendar);
+  const races = remoteRaces && remoteRaces.length > 0 ? toRaceItems(remoteRaces) : raceCalendar;
+  const upcomingRaces = races.slice(0, 3);
+  const upcomingTableRaces = tableRaces.slice(0, 3);
+
   return (
     <div className="page-shell">
       <section className="hero-grid overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,0.28),transparent_34%),radial-gradient(circle_at_85%_0%,rgba(0,212,255,0.22),transparent_26%),linear-gradient(135deg,rgba(20,28,39,0.98),rgba(11,15,20,0.92))] px-6 py-8 sm:px-10 sm:py-12 lg:px-14 lg:py-16">
@@ -171,7 +182,7 @@ export function HomePage() {
 
       <section className="space-y-6" aria-label="Race table">
         <SectionIntro eyebrow="Race Calendar" title="" description="" />
-        <RaceTable races={upcomingRaces} />
+        <RaceTable races={upcomingTableRaces} />
       </section>
 
       <section className="space-y-6">

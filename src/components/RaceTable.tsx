@@ -1,27 +1,66 @@
 import { Link } from 'react-router-dom';
-import type { RaceItem } from '../data/races';
+import type { RaceCalendar } from '../types';
 
 type RaceTableProps = {
-  races: RaceItem[];
+  races: RaceCalendar[];
 };
 
-function statusClass(status: RaceItem['registrationStatus']) {
+function registrationStatus(race: RaceCalendar): 'Entries open' | 'Closed' {
+  if (!race.externalRegistrationUrl) {
+    return 'Closed';
+  }
+
+  const raceDate = new Date(race.raceDate);
+  if (!Number.isNaN(raceDate.getTime()) && raceDate.getTime() < Date.now()) {
+    return 'Closed';
+  }
+
+  return 'Entries open';
+}
+
+function statusClass(status: ReturnType<typeof registrationStatus>) {
   if (status === 'Entries open') {
     return 'border-[color:var(--success)]/40 bg-[color:var(--success)]/15 text-[color:var(--text-primary-dark)]';
   }
 
-  if (status === 'Waitlist') {
-    return 'border-[color:var(--warning)]/40 bg-[color:var(--warning)]/16 text-[color:var(--text-primary-dark)]';
+  return 'border-white/10 bg-white/8 text-[color:var(--text-secondary-dark)]';
+}
+
+function formatRaceDate(date: string): string {
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) {
+    return date;
   }
 
-  if (status === 'Closed') {
-    return 'border-white/10 bg-white/8 text-[color:var(--text-secondary-dark)]';
-  }
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(parsed);
+}
 
-  return 'border-[color:var(--accent-secondary)]/28 bg-[color:var(--accent-secondary)]/12 text-[color:var(--text-primary-dark)]';
+function parseCity(location: string): string {
+  const city = location.split(',')[0]?.trim();
+  return city || location;
+}
+
+function formatRaceType(type: string): string {
+  return type
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map(part => part[0]!.toUpperCase() + part.slice(1).toLowerCase())
+    .join(' ');
 }
 
 export function RaceTable({ races }: RaceTableProps) {
+  if (races.length === 0) {
+    return (
+      <div className="surface-panel p-6 text-sm text-(--text-secondary-dark) sm:p-8">
+        No race data available yet.
+      </div>
+    );
+  }
+
   return (
     <div className="surface-panel overflow-hidden">
       <div className="overflow-x-auto">
@@ -36,25 +75,36 @@ export function RaceTable({ races }: RaceTableProps) {
             </tr>
           </thead>
           <tbody>
-            {races.map((race) => (
+            {races.map((race) => {
+              const status = registrationStatus(race);
+              const city = parseCity(race.location);
+
+              return (
               <tr key={race.id} className="border-b border-white/8 text-sm text-(--text-secondary-dark)">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div aria-hidden="true" className="race-table-thumb" style={{ background: race.cover }} />
+                    <div
+                      aria-hidden="true"
+                      className="race-table-thumb"
+                      style={{
+                        background:
+                          'linear-gradient(140deg, rgba(124,58,237,0.52), rgba(11,15,20,0.78)), radial-gradient(circle at 82% 16%, rgba(0,212,255,0.36), transparent 38%)',
+                      }}
+                    />
                     <div>
-                      <p className="font-heading text-lg font-semibold text-(--text-primary-dark)">{race.title}</p>
-                      <p className="text-xs uppercase tracking-[0.16em] text-(--text-secondary-dark)">{race.round}</p>
+                      <p className="font-heading text-lg font-semibold text-(--text-primary-dark)">{city} {formatRaceType(race.type)}</p>
+                      <p className="text-xs uppercase tracking-[0.16em] text-(--text-secondary-dark)">{race.subRaces?.length ?? 0} categories</p>
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-(--text-primary-dark)">{race.date}</td>
+                <td className="px-6 py-4 text-(--text-primary-dark)">{formatRaceDate(race.raceDate)}</td>
                 <td className="px-6 py-4">
-                  <p className="text-(--text-primary-dark)">{race.city}</p>
-                  <p className="text-xs text-(--text-secondary-dark)">{race.venue}</p>
+                  <p className="text-(--text-primary-dark)">{city}</p>
+                  <p className="text-xs text-(--text-secondary-dark)">{race.location}</p>
                 </td>
                 <td className="px-6 py-4">
-                  <span className={`inline-flex rounded-full border px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] ${statusClass(race.registrationStatus)}`}>
-                    {race.registrationStatus}
+                  <span className={`inline-flex rounded-full border px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] ${statusClass(status)}`}>
+                    {status}
                   </span>
                 </td>
                 <td className="px-6 py-4">
@@ -63,7 +113,8 @@ export function RaceTable({ races }: RaceTableProps) {
                   </Link>
                 </td>
               </tr>
-            ))}
+            );
+            })}
           </tbody>
         </table>
       </div>
