@@ -60,6 +60,7 @@ export function mapRaceSubRace(row: RaceCalendarWithRelations['race_sub_races'][
 export function mapRaceCalendar(row: RaceCalendarWithRelations): RaceCalendar {
   return {
     id: row.id,
+    name: row.name,
     raceDate: row.race_date,
     type: row.type,
     location: row.location,
@@ -73,6 +74,7 @@ export function mapRaceCalendar(row: RaceCalendarWithRelations): RaceCalendar {
 
 const raceCalendarSelect = `
   id,
+  name,
   race_date,
   type,
   location,
@@ -130,4 +132,22 @@ export async function fetchRaceCalendars(): Promise<RaceCalendar[]> {
 
   const rows = (data ?? []) as RaceCalendarWithRelations[];
   return rows.map(mapRaceCalendar);
+}
+
+export async function fetchRaceCalendarById(id: string): Promise<RaceCalendar | null> {
+  const { data, error } = await supabase
+    .from('race_calendar')
+    .select(raceCalendarSelect)
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return mapRaceCalendar(data as RaceCalendarWithRelations);
 }

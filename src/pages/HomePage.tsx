@@ -3,9 +3,20 @@ import { Link } from 'react-router-dom';
 import { RaceCard } from '../components/RaceCard';
 import { SectionIntro } from '../components/SectionIntro';
 import { raceCalendar } from '../data/races';
-import { fetchRaceCalendars } from '../lib/raceCalendar';
+import { fetchRaceCalendarById, fetchRaceCalendars } from '../lib/raceCalendar';
 import { toFallbackRaceCalendars, toRaceItems } from '../lib/racePresentation';
 import { RaceTable } from '../components/RaceTable';
+import type { RaceCalendar } from '../types';
+
+const PROMOTED_RACE_ID = 'd71c1d76-d4be-49d7-9661-62817a5bb21e';
+
+function sortRacesByDate(races: RaceCalendar[]): RaceCalendar[] {
+  return [...races].sort((a, b) => {
+    const dateA = new Date(a.raceDate).getTime();
+    const dateB = new Date(b.raceDate).getTime();
+    return dateA - dateB;
+  });
+}
 
 const categories = [
   {
@@ -89,10 +100,23 @@ export function HomePage() {
     queryFn: fetchRaceCalendars,
   });
 
-  const tableRaces = remoteRaces && remoteRaces.length > 0 ? remoteRaces : toFallbackRaceCalendars(raceCalendar);
+  const { data: promotedRace } = useQuery({
+    queryKey: ['race-promotion', PROMOTED_RACE_ID],
+    queryFn: () => fetchRaceCalendarById(PROMOTED_RACE_ID),
+  });
+
+  const tableRaces = sortRacesByDate(remoteRaces && remoteRaces.length > 0 ? remoteRaces : toFallbackRaceCalendars(raceCalendar));
   const races = remoteRaces && remoteRaces.length > 0 ? toRaceItems(remoteRaces) : raceCalendar;
   const upcomingRaces = races.slice(0, 3);
   const upcomingTableRaces = tableRaces.slice(0, 3);
+
+  const promotedRaceDate = promotedRace?.raceDate
+    ? new Intl.DateTimeFormat('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      }).format(new Date(promotedRace.raceDate))
+    : 'Date TBA';
 
   return (
     <div className="page-shell">
@@ -113,7 +137,7 @@ export function HomePage() {
               zeigen.
             </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            {/* <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 className="cta-button w-full justify-center sm:w-auto"
                 to="/races"
@@ -126,7 +150,7 @@ export function HomePage() {
               >
                 Ask About Registration
               </Link>
-            </div>
+            </div> */}
 
             {/* <dl className="mt-10 grid gap-4 sm:grid-cols-3">
               <div className="stat-card">
@@ -148,19 +172,25 @@ export function HomePage() {
           <div className="grid gap-4 self-end">
             <div className="hero-highlight-card rounded-[1.75rem] border border-white/10 p-5 sm:p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.26em] text-(--accent-secondary)">
-                Upcoming focus
+                Upcoming Highlight
               </p>
               <h2 className="mt-3 font-heading text-2xl font-semibold text-(--text-primary-dark)">
-                Berlin Night Circuit
+                {promotedRace?.name ?? 'Featured race'}
               </h2>
               <p className="mt-3 text-sm leading-6 text-(--text-secondary-dark)">
-                Evening racing, short laps, clear category blocks, and a layout
-                designed to put registration and event details above the fold.
+                {promotedRace
+                  ? `Highlighted event in ${promotedRace.location}. Explore category blocks and participant data from the race detail page.`
+                  : 'Promotion race is loading. Check back in a moment for latest event details.'}
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
-                <span className="filter-chip">Tempelhof</span>
-                <span className="filter-chip">45 min + 3</span>
-                <span className="filter-chip">Entries open</span>
+                <span className="filter-chip">{promotedRaceDate}</span>
+                <span className="filter-chip">{promotedRace?.location ?? 'Location TBA'}</span>
+              </div>
+
+              <div className="mt-5">
+                <Link className="cta-button w-full justify-center" to="#">
+                  Register Now
+                </Link>
               </div>
             </div>
 

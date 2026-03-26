@@ -24,6 +24,7 @@ export type RaceEntryStatus = 'finished' | 'dns' | 'dnf' | 'dsq' | null;
 
 export interface RaceCalendarRow {
     id: UUID;
+    name: string
     race_date: string;
     type: RaceType;
     location: string;
@@ -115,6 +116,7 @@ export interface RaceSubRace {
 
 export interface RaceCalendar {
     id: UUID;
+    name: string;
     raceDate: string;
     type: RaceType;
     location: string;
@@ -127,6 +129,7 @@ export interface RaceCalendar {
 
 export interface RaceCalendarWithRelations {
     id: UUID;
+    name: string;
     race_date: string;
     type: string;
     location: string;

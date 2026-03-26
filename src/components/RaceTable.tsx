@@ -5,21 +5,21 @@ type RaceTableProps = {
   races: RaceCalendar[];
 };
 
-function registrationStatus(race: RaceCalendar): 'Entries open' | 'Closed' {
-  if (!race.externalRegistrationUrl) {
-    return 'Closed';
-  }
-
+function raceStatus(race: RaceCalendar): 'OPEN' | 'FINISHED' {
   const raceDate = new Date(race.raceDate);
-  if (!Number.isNaN(raceDate.getTime()) && raceDate.getTime() < Date.now()) {
-    return 'Closed';
+  if (Number.isNaN(raceDate.getTime())) {
+    return 'OPEN';
   }
 
-  return 'Entries open';
+  const today = new Date();
+  const raceDay = new Date(raceDate.getFullYear(), raceDate.getMonth(), raceDate.getDate()).getTime();
+  const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+
+  return raceDay < todayDay ? 'FINISHED' : 'OPEN';
 }
 
-function statusClass(status: ReturnType<typeof registrationStatus>) {
-  if (status === 'Entries open') {
+function statusClass(status: ReturnType<typeof raceStatus>) {
+  if (status === 'OPEN') {
     return 'border-[color:var(--success)]/40 bg-[color:var(--success)]/15 text-[color:var(--text-primary-dark)]';
   }
 
@@ -70,13 +70,13 @@ export function RaceTable({ races }: RaceTableProps) {
               <th className="px-6 py-4 font-semibold">Race</th>
               <th className="px-6 py-4 font-semibold">Date</th>
               <th className="px-6 py-4 font-semibold">City</th>
-              <th className="px-6 py-4 font-semibold">Status</th>
+              <th className="px-6 py-4 font-semibold">Registration Status</th>
               <th className="px-6 py-4 font-semibold">Details</th>
             </tr>
           </thead>
           <tbody>
             {races.map((race) => {
-              const status = registrationStatus(race);
+              const status = raceStatus(race);
               const city = parseCity(race.location);
 
               return (
@@ -92,14 +92,13 @@ export function RaceTable({ races }: RaceTableProps) {
                       }}
                     />
                     <div>
-                      <p className="font-heading text-lg font-semibold text-(--text-primary-dark)">{city} {formatRaceType(race.type)}</p>
+                      <p className="font-heading text-lg font-semibold text-(--text-primary-dark)">{race.name || `${city} ${formatRaceType(race.type)}`}</p>
                       <p className="text-xs uppercase tracking-[0.16em] text-(--text-secondary-dark)">{race.subRaces?.length ?? 0} categories</p>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 text-(--text-primary-dark)">{formatRaceDate(race.raceDate)}</td>
                 <td className="px-6 py-4">
-                  <p className="text-(--text-primary-dark)">{city}</p>
                   <p className="text-xs text-(--text-secondary-dark)">{race.location}</p>
                 </td>
                 <td className="px-6 py-4">

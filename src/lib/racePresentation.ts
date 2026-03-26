@@ -56,15 +56,16 @@ export function toRaceItem(race: RaceCalendar, index: number): RaceItem {
   const city = parseCity(race.location);
   const typeLabel = formatRaceType(race.type);
   const categoryNames = race.subRaces?.map(subRace => subRace.name) ?? [];
+  const raceTitle = race.name?.trim() ? race.name : `${city} ${typeLabel}`;
 
   return {
     id: race.id,
     round: `Round ${(index + 1).toString().padStart(2, '0')}`,
-    title: `${city} ${typeLabel}`,
+    title: raceTitle,
     date: formatRaceDate(race.raceDate),
     city,
     venue: race.location,
-    description: `${typeLabel} event in ${race.location}.`,
+    description: `${raceTitle} - ${typeLabel} event in ${race.location}.`,
     categories: categoryNames.length > 0 ? categoryNames : ['Open'],
     format: categoryNames.length > 0 ? `${categoryNames.length} categories` : 'TBA',
     registrationStatus: registrationStatus(race),
@@ -90,6 +91,7 @@ export function toFallbackRaceCalendars(items: RaceItem[]): RaceCalendar[] {
 
     return {
       id: item.id,
+      name: item.title,
       raceDate: item.date,
       type: 'criterium',
       location: `${item.city}, ${item.venue}`,
