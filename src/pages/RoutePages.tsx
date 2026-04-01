@@ -309,12 +309,12 @@ export function RaceDetailPage() {
 
         <div className="mt-7 flex flex-col gap-3 sm:flex-row">
           {race.externalRegistrationUrl ? (
-            <a className="cta-button w-full justify-center sm:w-auto" href={race.externalRegistrationUrl} rel="noreferrer" target="_blank">
-              Open registration
-            </a>
+            <Link className="cta-button w-full justify-center sm:w-auto" to={`/races/${race.id}/register`}>
+              Register now
+            </Link>
           ) : (
-            <Link className="cta-button w-full justify-center sm:w-auto" to="/contact">
-              Ask about registration
+            <Link className="cta-button w-full justify-center sm:w-auto" to={`/races/${race.id}/register`}>
+              Register now
             </Link>
           )}
           {race.externalResultsUrl ? (

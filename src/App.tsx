@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
 import { AppLayout } from './components/AppLayout';
 import { HomePage } from './pages/HomePage';
+import { RaceRegistrationPage } from './pages/RaceRegistrationPage';
 import {
   AboutPage,
   CategoriesPage,
@@ -41,6 +42,7 @@ function App() {
           <Route element={<HomePage />} path="/" />
           <Route element={<RacesPage />} path="/races" />
           <Route element={<RaceDetailPage />} path="/races/:slug" />
+          <Route element={<RaceRegistrationPage />} path="/races/:slug/register" />
           <Route element={<ResultsPage />} path="/results" />
           <Route element={<ResultsSeasonPage />} path="/results/:season" />
           <Route element={<ResultsRacePage />} path="/results/:season/:raceSlug" />

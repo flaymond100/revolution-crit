@@ -188,7 +188,7 @@ export function HomePage() {
               </div>
 
               <div className="mt-5">
-                <Link className="cta-button w-full justify-center" to="#">
+                <Link className="cta-button w-full justify-center" to={promotedRace ? `/races/${promotedRace.id}/register` : '/races'}>
                   Register Now
                 </Link>
               </div>
