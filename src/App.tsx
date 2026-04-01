@@ -42,14 +42,23 @@ function App() {
           <Route element={<HomePage />} path="/" />
           <Route element={<RacesPage />} path="/races" />
           <Route element={<RaceDetailPage />} path="/races/:slug" />
-          <Route element={<RaceRegistrationPage />} path="/races/:slug/register" />
+          <Route
+            element={<RaceRegistrationPage />}
+            path="/races/:slug/register"
+          />
           <Route element={<ResultsPage />} path="/results" />
           <Route element={<ResultsSeasonPage />} path="/results/:season" />
-          <Route element={<ResultsRacePage />} path="/results/:season/:raceSlug" />
+          <Route
+            element={<ResultsRacePage />}
+            path="/results/:season/:raceSlug"
+          />
           <Route element={<CategoriesPage />} path="/categories" />
           <Route element={<GalleryPage />} path="/gallery" />
           <Route element={<GallerySeasonPage />} path="/gallery/:season" />
-          <Route element={<GalleryRacePage />} path="/gallery/:season/:raceSlug" />
+          <Route
+            element={<GalleryRacePage />}
+            path="/gallery/:season/:raceSlug"
+          />
           <Route element={<AboutPage />} path="/about" />
           <Route element={<TrainingCampPage />} path="/training-camp" />
           <Route element={<PartnersPage />} path="/partners" />
