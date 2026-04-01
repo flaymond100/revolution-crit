@@ -11,11 +11,14 @@ type RegistrationFormState = {
   clubTeam: string;
   nation: string;
   startingClass: string;
+  uciLicenseNumber: string;
   email: string;
   privacyAccepted: boolean;
 };
 
-type RegistrationFormErrors = Partial<Record<keyof RegistrationFormState, string>>;
+type RegistrationFormErrors = Partial<
+  Record<keyof RegistrationFormState, string>
+>;
 
 const initialFormState: RegistrationFormState = {
   firstName: '',
@@ -25,6 +28,7 @@ const initialFormState: RegistrationFormState = {
   clubTeam: '',
   nation: '',
   startingClass: '',
+  uciLicenseNumber: '',
   email: '',
   privacyAccepted: false,
 };
@@ -35,28 +39,10 @@ const genderOptions = [
   { value: 'other', label: 'Other' },
 ];
 
-function formatRaceDate(date: string): string {
-  const parsed = new Date(date);
-  if (Number.isNaN(parsed.getTime())) {
-    return date;
-  }
-
-  return new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  }).format(parsed);
-}
-
-function formatRaceType(type: string): string {
-  return type
-    .split(/[-_\s]+/)
-    .filter(Boolean)
-    .map(part => part[0]!.toUpperCase() + part.slice(1).toLowerCase())
-    .join(' ');
-}
-
-function validateForm(state: RegistrationFormState): RegistrationFormErrors {
+function validateForm(
+  state: RegistrationFormState,
+  isEliteClassSelected: boolean
+): RegistrationFormErrors {
   const errors: RegistrationFormErrors = {};
 
   if (!state.firstName.trim()) {
@@ -83,6 +69,10 @@ function validateForm(state: RegistrationFormState): RegistrationFormErrors {
     errors.startingClass = 'Starting class is required.';
   }
 
+  if (isEliteClassSelected && !state.uciLicenseNumber.trim()) {
+    errors.uciLicenseNumber = 'UCI license number is required for Elite class.';
+  }
+
   if (!state.email.trim()) {
     errors.email = 'Email is required.';
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)) {
@@ -98,10 +88,15 @@ function validateForm(state: RegistrationFormState): RegistrationFormErrors {
 
 export function RaceRegistrationPage() {
   const { slug } = useParams();
-  const [formState, setFormState] = useState<RegistrationFormState>(initialFormState);
+  const [formState, setFormState] =
+    useState<RegistrationFormState>(initialFormState);
   const [errors, setErrors] = useState<RegistrationFormErrors>({});
 
-  const { data: race, isLoading, isError } = useQuery({
+  const {
+    data: race,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['race-registration', slug],
     queryFn: () => fetchRaceCalendarById(slug ?? ''),
     enabled: Boolean(slug),
@@ -126,7 +121,10 @@ export function RaceRegistrationPage() {
     }
 
     setFormState(current => {
-      if (current.startingClass && sortedSubRaces.some(subRace => subRace.id === current.startingClass)) {
+      if (
+        current.startingClass &&
+        sortedSubRaces.some(subRace => subRace.id === current.startingClass)
+      ) {
         return current;
       }
 
@@ -137,9 +135,49 @@ export function RaceRegistrationPage() {
     });
   }, [sortedSubRaces]);
 
-  const formDisabled = !race?.externalRegistrationUrl || sortedSubRaces.length === 0;
+  const formDisabled =
+    !race?.externalRegistrationUrl || sortedSubRaces.length === 0;
 
-  const handleFieldChange = (field: keyof RegistrationFormState, value: string | boolean) => {
+  const isEliteClassSelected = useMemo(() => {
+    const selectedSubRace = sortedSubRaces.find(
+      subRace => subRace.id === formState.startingClass
+    );
+
+    return selectedSubRace?.name.trim().toLowerCase() === 'elite';
+  }, [formState.startingClass, sortedSubRaces]);
+
+  useEffect(() => {
+    if (isEliteClassSelected) {
+      return;
+    }
+
+    setFormState(current => {
+      if (!current.uciLicenseNumber) {
+        return current;
+      }
+
+      return {
+        ...current,
+        uciLicenseNumber: '',
+      };
+    });
+
+    setErrors(current => {
+      if (!current.uciLicenseNumber) {
+        return current;
+      }
+
+      return {
+        ...current,
+        uciLicenseNumber: undefined,
+      };
+    });
+  }, [isEliteClassSelected]);
+
+  const handleFieldChange = (
+    field: keyof RegistrationFormState,
+    value: string | boolean
+  ) => {
     setFormState(current => ({
       ...current,
       [field]: value,
@@ -160,7 +198,7 @@ export function RaceRegistrationPage() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const nextErrors = validateForm(formState);
+    const nextErrors = validateForm(formState, isEliteClassSelected);
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0 || !race?.externalRegistrationUrl) {
@@ -181,7 +219,10 @@ export function RaceRegistrationPage() {
         <div className="surface-panel p-6 sm:p-8">
           <div className="grid gap-4 md:grid-cols-2">
             {Array.from({ length: 8 }).map((_, index) => (
-              <div key={index} className="h-20 animate-pulse rounded-[1.5rem] bg-white/6" />
+              <div
+                key={index}
+                className="h-20 animate-pulse rounded-[1.5rem] bg-white/6"
+              />
             ))}
           </div>
         </div>
@@ -198,7 +239,8 @@ export function RaceRegistrationPage() {
             Race not found.
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-(--text-secondary-dark)">
-            We could not load this registration form. The race may be unpublished or the link is incorrect.
+            We could not load this registration form. The race may be
+            unpublished or the link is incorrect.
           </p>
           <div className="mx-auto mt-8 flex max-w-sm flex-col gap-3 sm:flex-row sm:justify-center">
             <Link className="cta-button w-full justify-center" to="/races">
@@ -232,13 +274,24 @@ export function RaceRegistrationPage() {
       </div> */}
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.7fr]">
-        <form className="surface-panel p-6 sm:p-8" noValidate onSubmit={handleSubmit}>
+        <form
+          className="surface-panel p-6 sm:p-8"
+          noValidate
+          onSubmit={handleSubmit}
+        >
           <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-5">
             <div>
-              <h2 className="font-heading text-2xl font-semibold text-(--text-primary-dark)">Online registration for {race.name}</h2> 
-              <p className="mt-2 text-sm leading-6 text-(--text-secondary-dark)">Fields marked with * are required.</p>
+              <h2 className="font-heading text-2xl font-semibold text-(--text-primary-dark)">
+                Online registration for {race.name}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-(--text-secondary-dark)">
+                Fields marked with * are required.
+              </p>
             </div>
-            <Link className="ghost-button hidden sm:inline-flex" to={`/races/${race.id}`}>
+            <Link
+              className="ghost-button hidden sm:inline-flex"
+              to={`/races/${race.id}`}
+            >
               Back to race
             </Link>
           </div>
@@ -249,12 +302,18 @@ export function RaceRegistrationPage() {
               <input
                 className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-[color:var(--accent-secondary)]"
                 name="firstName"
-                onChange={event => handleFieldChange('firstName', event.target.value)}
+                onChange={event =>
+                  handleFieldChange('firstName', event.target.value)
+                }
                 placeholder="First name"
                 type="text"
                 value={formState.firstName}
               />
-              {errors.firstName ? <span className="text-sm text-[color:var(--accent-cta)]">{errors.firstName}</span> : null}
+              {errors.firstName ? (
+                <span className="text-sm text-[color:var(--accent-cta)]">
+                  {errors.firstName}
+                </span>
+              ) : null}
             </label>
 
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
@@ -262,12 +321,18 @@ export function RaceRegistrationPage() {
               <input
                 className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-[color:var(--accent-secondary)]"
                 name="lastName"
-                onChange={event => handleFieldChange('lastName', event.target.value)}
+                onChange={event =>
+                  handleFieldChange('lastName', event.target.value)
+                }
                 placeholder="Last name"
                 type="text"
                 value={formState.lastName}
               />
-              {errors.lastName ? <span className="text-sm text-[color:var(--accent-cta)]">{errors.lastName}</span> : null}
+              {errors.lastName ? (
+                <span className="text-sm text-[color:var(--accent-cta)]">
+                  {errors.lastName}
+                </span>
+              ) : null}
             </label>
 
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
@@ -275,11 +340,17 @@ export function RaceRegistrationPage() {
               <input
                 className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-[color:var(--accent-secondary)]"
                 name="birthDate"
-                onChange={event => handleFieldChange('birthDate', event.target.value)}
+                onChange={event =>
+                  handleFieldChange('birthDate', event.target.value)
+                }
                 type="date"
                 value={formState.birthDate}
               />
-              {errors.birthDate ? <span className="text-sm text-[color:var(--accent-cta)]">{errors.birthDate}</span> : null}
+              {errors.birthDate ? (
+                <span className="text-sm text-[color:var(--accent-cta)]">
+                  {errors.birthDate}
+                </span>
+              ) : null}
             </label>
 
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
@@ -287,7 +358,9 @@ export function RaceRegistrationPage() {
               <select
                 className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-[color:var(--accent-secondary)]"
                 name="gender"
-                onChange={event => handleFieldChange('gender', event.target.value)}
+                onChange={event =>
+                  handleFieldChange('gender', event.target.value)
+                }
                 value={formState.gender}
               >
                 <option value="">Please select...</option>
@@ -297,7 +370,11 @@ export function RaceRegistrationPage() {
                   </option>
                 ))}
               </select>
-              {errors.gender ? <span className="text-sm text-[color:var(--accent-cta)]">{errors.gender}</span> : null}
+              {errors.gender ? (
+                <span className="text-sm text-[color:var(--accent-cta)]">
+                  {errors.gender}
+                </span>
+              ) : null}
             </label>
 
             <label className="grid gap-2 text-sm text-(--text-secondary-dark) md:col-span-2">
@@ -305,7 +382,9 @@ export function RaceRegistrationPage() {
               <input
                 className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-[color:var(--accent-secondary)]"
                 name="clubTeam"
-                onChange={event => handleFieldChange('clubTeam', event.target.value)}
+                onChange={event =>
+                  handleFieldChange('clubTeam', event.target.value)
+                }
                 placeholder="Club or team name"
                 type="text"
                 value={formState.clubTeam}
@@ -317,12 +396,18 @@ export function RaceRegistrationPage() {
               <input
                 className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-[color:var(--accent-secondary)]"
                 name="nation"
-                onChange={event => handleFieldChange('nation', event.target.value)}
+                onChange={event =>
+                  handleFieldChange('nation', event.target.value)
+                }
                 placeholder="Nation"
                 type="text"
                 value={formState.nation}
               />
-              {errors.nation ? <span className="text-sm text-[color:var(--accent-cta)]">{errors.nation}</span> : null}
+              {errors.nation ? (
+                <span className="text-sm text-[color:var(--accent-cta)]">
+                  {errors.nation}
+                </span>
+              ) : null}
             </label>
 
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
@@ -331,18 +416,47 @@ export function RaceRegistrationPage() {
                 className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-[color:var(--accent-secondary)] disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={sortedSubRaces.length === 0}
                 name="startingClass"
-                onChange={event => handleFieldChange('startingClass', event.target.value)}
+                onChange={event =>
+                  handleFieldChange('startingClass', event.target.value)
+                }
                 value={formState.startingClass}
               >
-                {sortedSubRaces.length === 0 ? <option value="">No starting classes available</option> : null}
+                {sortedSubRaces.length === 0 ? (
+                  <option value="">No starting classes available</option>
+                ) : null}
                 {sortedSubRaces.map(subRace => (
                   <option key={subRace.id} value={subRace.id}>
                     {subRace.name}
                   </option>
                 ))}
               </select>
-              {errors.startingClass ? <span className="text-sm text-[color:var(--accent-cta)]">{errors.startingClass}</span> : null}
+              {errors.startingClass ? (
+                <span className="text-sm text-[color:var(--accent-cta)]">
+                  {errors.startingClass}
+                </span>
+              ) : null}
             </label>
+
+            {isEliteClassSelected ? (
+              <label className="grid gap-2 text-sm text-(--text-secondary-dark) md:col-span-2">
+                <span>UCI License Number *</span>
+                <input
+                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-[color:var(--accent-secondary)]"
+                  name="uciLicenseNumber"
+                  onChange={event =>
+                    handleFieldChange('uciLicenseNumber', event.target.value)
+                  }
+                  placeholder="Enter your UCI license number"
+                  type="text"
+                  value={formState.uciLicenseNumber}
+                />
+                {errors.uciLicenseNumber ? (
+                  <span className="text-sm text-[color:var(--accent-cta)]">
+                    {errors.uciLicenseNumber}
+                  </span>
+                ) : null}
+              </label>
+            ) : null}
 
             <label className="grid gap-2 text-sm text-(--text-secondary-dark) md:col-span-2">
               <span>Email *</span>
@@ -350,33 +464,55 @@ export function RaceRegistrationPage() {
                 autoComplete="email"
                 className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-[color:var(--accent-secondary)]"
                 name="email"
-                onChange={event => handleFieldChange('email', event.target.value)}
+                onChange={event =>
+                  handleFieldChange('email', event.target.value)
+                }
                 placeholder="name@example.com"
                 type="email"
                 value={formState.email}
               />
-              {errors.email ? <span className="text-sm text-[color:var(--accent-cta)]">{errors.email}</span> : null}
+              {errors.email ? (
+                <span className="text-sm text-[color:var(--accent-cta)]">
+                  {errors.email}
+                </span>
+              ) : null}
             </label>
           </div>
 
           <div className="mt-8 rounded-[1.5rem] border border-white/10 bg-white/4 p-5">
-            <h3 className="font-heading text-xl font-semibold text-(--text-primary-dark)">Privacy Policy & Disclaimer</h3>
+            <h3 className="font-heading text-xl font-semibold text-(--text-primary-dark)">
+              Privacy Policy & Disclaimer
+            </h3>
             <p className="mt-3 text-sm leading-6 text-(--text-secondary-dark)">
-              You must accept the privacy policy before continuing to the Stripe payment page.
+              You must accept the privacy policy before continuing to the Stripe
+              payment page.
             </p>
             <label className="mt-4 flex items-start gap-3 text-sm leading-6 text-(--text-secondary-dark)">
               <input
                 checked={formState.privacyAccepted}
                 className="mt-1 h-4 w-4 rounded border border-white/10 bg-white/5"
                 name="privacyAccepted"
-                onChange={event => handleFieldChange('privacyAccepted', event.target.checked)}
+                onChange={event =>
+                  handleFieldChange('privacyAccepted', event.target.checked)
+                }
                 type="checkbox"
               />
               <span>
-                I agree to the <Link className="text-(--accent-secondary) underline decoration-transparent transition hover:decoration-current" to="/privacy">privacy policy</Link>. *
+                I agree to the{' '}
+                <Link
+                  className="text-(--accent-secondary) underline decoration-transparent transition hover:decoration-current"
+                  to="/privacy"
+                >
+                  privacy policy
+                </Link>
+                . *
               </span>
             </label>
-            {errors.privacyAccepted ? <p className="mt-2 text-sm text-[color:var(--accent-cta)]">{errors.privacyAccepted}</p> : null}
+            {errors.privacyAccepted ? (
+              <p className="mt-2 text-sm text-[color:var(--accent-cta)]">
+                {errors.privacyAccepted}
+              </p>
+            ) : null}
           </div>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -387,22 +523,27 @@ export function RaceRegistrationPage() {
             >
               Continue to payment
             </button>
-            <Link className="ghost-button w-full justify-center" to={`/races/${race.id}`}>
+            <Link
+              className="ghost-button w-full justify-center"
+              to={`/races/${race.id}`}
+            >
               Cancel
             </Link>
           </div>
 
           {formDisabled ? (
             <p className="mt-4 text-sm leading-6 text-(--text-secondary-dark)">
-              Registration is currently unavailable for this race. Check back later or contact the organizers directly.
+              Registration is currently unavailable for this race. Check back
+              later or contact the organizers directly.
             </p>
           ) : null}
         </form>
 
         <aside className="grid gap-4 self-start">
-
           <div className="surface-panel p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-(--accent-secondary)">Available classes</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-(--accent-secondary)">
+              Available classes
+            </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {sortedSubRaces.length > 0 ? (
                 sortedSubRaces.map(subRace => (
@@ -411,17 +552,25 @@ export function RaceRegistrationPage() {
                   </span>
                 ))
               ) : (
-                <p className="text-sm text-(--text-secondary-dark)">No starting classes are configured yet.</p>
+                <p className="text-sm text-(--text-secondary-dark)">
+                  No starting classes are configured yet.
+                </p>
               )}
             </div>
           </div>
 
           <div className="surface-panel p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-(--accent-secondary)">Need help?</p>
-            <p className="mt-3 text-sm leading-6 text-(--text-secondary-dark)">
-              If your class is missing or the payment link is not available, use the organizer contact page instead.
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-(--accent-secondary)">
+              Need help?
             </p>
-            <Link className="ghost-button mt-5 w-full justify-center" to="/contact">
+            <p className="mt-3 text-sm leading-6 text-(--text-secondary-dark)">
+              If your class is missing or the payment link is not available, use
+              the organizer contact page instead.
+            </p>
+            <Link
+              className="ghost-button mt-5 w-full justify-center"
+              to="/contact"
+            >
               Contact organizers
             </Link>
           </div>
