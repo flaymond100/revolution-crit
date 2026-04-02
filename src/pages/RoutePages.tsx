@@ -26,7 +26,14 @@ type PlaceholderPageProps = {
   ctaTo?: string;
 };
 
-function PlaceholderPage({ eyebrow, title, description, highlights, ctaLabel, ctaTo }: PlaceholderPageProps) {
+function PlaceholderPage({
+  eyebrow,
+  title,
+  description,
+  highlights,
+  ctaLabel,
+  ctaTo,
+}: PlaceholderPageProps) {
   return (
     <section className="page-shell">
       <div className="surface-panel overflow-hidden">
@@ -47,8 +54,11 @@ function PlaceholderPage({ eyebrow, title, description, highlights, ctaLabel, ct
           </div>
 
           <div className="grid gap-3 self-start">
-            {highlights.map((highlight) => (
-              <div key={highlight} className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4 text-sm leading-6 text-(--text-secondary-dark)">
+            {highlights.map(highlight => (
+              <div
+                key={highlight}
+                className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4 text-sm leading-6 text-(--text-secondary-dark)"
+              >
                 {highlight}
               </div>
             ))}
@@ -65,7 +75,9 @@ export function RacesPage() {
     queryFn: fetchRaceCalendars,
   });
 
-  const tableRaces = sortRacesByDate(data && data.length > 0 ? data : toFallbackRaceCalendars(raceCalendar));
+  const tableRaces = sortRacesByDate(
+    data && data.length > 0 ? data : toFallbackRaceCalendars(raceCalendar)
+  );
   const races = data && data.length > 0 ? toRaceItems(data) : raceCalendar;
 
   if (isLoading) {
@@ -86,7 +98,10 @@ export function RacesPage() {
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="surface-panel h-[23rem] animate-pulse rounded-[1.75rem] bg-white/5" />
+            <div
+              key={index}
+              className="surface-panel h-[23rem] animate-pulse rounded-[1.75rem] bg-white/5"
+            />
           ))}
         </div>
       </section>
@@ -102,13 +117,17 @@ export function RacesPage() {
             No races published yet.
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-(--text-secondary-dark)">
-            The calendar is currently empty. Check back soon or reach out directly for pre-release race and registration information.
+            The calendar is currently empty. Check back soon or reach out
+            directly for pre-release race and registration information.
           </p>
           <div className="mx-auto mt-8 flex max-w-sm flex-col gap-3 sm:flex-row sm:justify-center">
             <Link className="cta-button w-full justify-center" to="/contact">
               Contact Organizers
             </Link>
-            <Link className="ghost-button w-full justify-center" to="/training-camp">
+            <Link
+              className="ghost-button w-full justify-center"
+              to="/training-camp"
+            >
               See Training Camp
             </Link>
           </div>
@@ -119,13 +138,8 @@ export function RacesPage() {
 
   return (
     <section className="page-shell">
-    
       <section className="space-y-6" aria-label="Race table">
-        <SectionIntro
-          eyebrow=""
-          title="Calendar table"
-          description=""
-        />
+        <SectionIntro eyebrow="" title="Calendar table" description="" />
         <RaceTable races={tableRaces} />
       </section>
 
@@ -168,7 +182,10 @@ export function RaceDetailPage() {
     queryFn: fetchRaceCalendars,
   });
 
-  const fallbackRaces = useMemo(() => toFallbackRaceCalendars(raceCalendar), []);
+  const fallbackRaces = useMemo(
+    () => toFallbackRaceCalendars(raceCalendar),
+    []
+  );
   const race = useMemo(() => {
     const fromRemote = data?.find(item => item.id === slug);
     if (fromRemote) {
@@ -198,12 +215,17 @@ export function RaceDetailPage() {
       return;
     }
 
-    if (!selectedSubRaceId || !sortedSubRaces.some(subRace => subRace.id === selectedSubRaceId)) {
+    if (
+      !selectedSubRaceId ||
+      !sortedSubRaces.some(subRace => subRace.id === selectedSubRaceId)
+    ) {
       setSelectedSubRaceId(sortedSubRaces[0].id);
     }
   }, [selectedSubRaceId, sortedSubRaces]);
 
-  const selectedSubRace = sortedSubRaces.find(subRace => subRace.id === selectedSubRaceId) ?? sortedSubRaces[0];
+  const selectedSubRace =
+    sortedSubRaces.find(subRace => subRace.id === selectedSubRaceId) ??
+    sortedSubRaces[0];
 
   const entries = useMemo(() => {
     if (!selectedSubRace?.entries) {
@@ -304,41 +326,57 @@ export function RaceDetailPage() {
           {race.name}
         </h1>
         <p className="mt-5 max-w-3xl text-base leading-7 text-(--text-secondary-dark)">
-          {raceTypeLabel} at {race.location}. Date: {formattedDate}. Browse sub-race tabs to inspect registered participants and race result information.
+          {raceTypeLabel} at {race.location}. Date: {formattedDate}. Browse
+          sub-race tabs to inspect registered participants and race result
+          information.
         </p>
 
         <div className="mt-7 flex flex-col gap-3 sm:flex-row">
           {race.externalRegistrationUrl ? (
-            <Link className="cta-button w-full justify-center sm:w-auto" to={`/races/${race.id}/register`}>
+            <Link
+              className="cta-button w-full justify-center sm:w-auto"
+              to={`/races/${race.id}/register`}
+            >
               Register now
             </Link>
           ) : (
-            <Link className="cta-button w-full justify-center sm:w-auto" to={`/races/${race.id}/register`}>
+            <Link
+              className="cta-button w-full justify-center sm:w-auto"
+              to={`/races/${race.id}/register`}
+            >
               Register now
             </Link>
           )}
           {race.externalResultsUrl ? (
-            <a className="ghost-button w-full justify-center sm:w-auto" href={race.externalResultsUrl} rel="noreferrer" target="_blank">
+            <a
+              className="ghost-button w-full justify-center sm:w-auto"
+              href={race.externalResultsUrl}
+              rel="noreferrer"
+              target="_blank"
+            >
               External results
             </a>
           ) : (
-            <Link className="ghost-button w-full justify-center sm:w-auto" to="/results">
+            <Link
+              className="ghost-button w-full justify-center sm:w-auto"
+              to="/results"
+            >
               Open results hub
             </Link>
           )}
         </div>
       </div>
 
-      <section className="space-y-6" aria-label="Sub-race participants">
+      <section className="space-y-6" aria-label="Categories participants">
         <SectionIntro
-          eyebrow="Sub-races"
+          eyebrow="Categories"
           title="Participants by category"
-          description="Select a sub-race tab to view participants, registration status, and timing details."
+          description="Select a category tab to view participants, registration status, and timing details."
         />
 
         {sortedSubRaces.length === 0 ? (
           <div className="surface-panel p-6 text-sm text-(--text-secondary-dark) sm:p-8">
-            No sub-races are configured for this event yet.
+            No categories are configured for this event yet.
           </div>
         ) : (
           <div className="surface-panel overflow-hidden">
@@ -366,7 +404,8 @@ export function RaceDetailPage() {
 
             {entries.length === 0 ? (
               <div className="px-6 py-8 text-sm text-(--text-secondary-dark) sm:px-8">
-                No participants available for {selectedSubRace?.name ?? 'this sub-race'} yet.
+                No participants available for{' '}
+                {selectedSubRace?.name ?? 'this sub-race'} yet.
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -384,17 +423,37 @@ export function RaceDetailPage() {
                   </thead>
                   <tbody>
                     {entries.map(entry => (
-                      <tr key={entry.id} className="border-b border-white/8 text-sm text-(--text-secondary-dark)">
-                        <td className="px-6 py-4 text-(--text-primary-dark)">{entry.position ?? '-'}</td>
-                        <td className="px-6 py-4 text-(--text-primary-dark)">{entry.bibNumber ?? '-'}</td>
-                        <td className="px-6 py-4">
-                          <p className="text-(--text-primary-dark)">{entry.participant?.fullName ?? `Participant ${entry.participantId.slice(0, 8)}`}</p>
-                          <p className="text-xs text-(--text-secondary-dark)">{entry.participant?.email ?? 'No contact email'}</p>
+                      <tr
+                        key={entry.id}
+                        className="border-b border-white/8 text-sm text-(--text-secondary-dark)"
+                      >
+                        <td className="px-6 py-4 text-(--text-primary-dark)">
+                          {entry.position ?? '-'}
                         </td>
-                        <td className="px-6 py-4 text-(--text-primary-dark)">{entry.participant?.teamName ?? '-'}</td>
-                        <td className="px-6 py-4 text-(--text-primary-dark)">{entry.participant?.nationality ?? '-'}</td>
-                        <td className="px-6 py-4 text-(--text-primary-dark)">{entry.status ?? 'registered'}</td>
-                        <td className="px-6 py-4 text-(--text-primary-dark)">{entry.timeText ?? '-'}</td>
+                        <td className="px-6 py-4 text-(--text-primary-dark)">
+                          {entry.bibNumber ?? '-'}
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-(--text-primary-dark)">
+                            {entry.participant?.fullName ??
+                              `Participant ${entry.participantId.slice(0, 8)}`}
+                          </p>
+                          <p className="text-xs text-(--text-secondary-dark)">
+                            {entry.participant?.email ?? 'No contact email'}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4 text-(--text-primary-dark)">
+                          {entry.participant?.teamName ?? '-'}
+                        </td>
+                        <td className="px-6 py-4 text-(--text-primary-dark)">
+                          {entry.participant?.nationality ?? '-'}
+                        </td>
+                        <td className="px-6 py-4 text-(--text-primary-dark)">
+                          {entry.status ?? 'registered'}
+                        </td>
+                        <td className="px-6 py-4 text-(--text-primary-dark)">
+                          {entry.timeText ?? '-'}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
