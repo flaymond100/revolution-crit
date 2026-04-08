@@ -31,10 +31,8 @@ export function RaceCard({
   return (
     <article
       className={[
-        'race-card group flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-white/10 p-5 sm:p-6',
-        featured
-          ? 'bg-[linear-gradient(160deg,rgba(124,58,237,0.24),rgba(18,25,35,0.96)_45%,rgba(11,15,20,0.98))]'
-          : 'bg-[linear-gradient(180deg,rgba(18,25,35,0.94),rgba(11,15,20,0.98))]',
+        'race-card group flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-[color:var(--border-dark)] p-5 sm:p-6',
+        featured ? 'race-card-featured' : 'race-card-default',
       ].join(' ')}
     >
       <div
@@ -52,7 +50,7 @@ export function RaceCard({
             {title}
           </h3>
         </div>
-        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-(--text-primary-dark)">
+        <span className="rounded-full border border-[color:var(--border-dark)] bg-[color:var(--surface-soft)] px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-(--text-primary-dark)">
           {registrationStatus}
         </span>
       </div>
@@ -86,7 +84,7 @@ export function RaceCard({
         ))}
       </div> */}
 
-      <div className="mt-6 flex items-center justify-between gap-3 border-t border-white/10 pt-5">
+      <div className="mt-6 flex items-center justify-between gap-3 border-t border-[color:var(--border-dark)] pt-5">
         <div>
           <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-(--text-secondary-dark)">
             Format

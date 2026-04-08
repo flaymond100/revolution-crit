@@ -31,7 +31,7 @@ function statusClass(status: ReturnType<typeof raceStatus>) {
     return 'border-[color:var(--success)]/40 bg-[color:var(--success)]/15 text-[color:var(--text-primary-dark)]';
   }
 
-  return 'border-white/10 bg-white/8 text-[color:var(--text-secondary-dark)]';
+  return 'border-[color:var(--border-dark)] bg-[color:var(--surface-soft)] text-[color:var(--text-secondary-dark)]';
 }
 
 function formatRaceDate(date: string): string {
@@ -74,7 +74,7 @@ export function RaceTable({ races }: RaceTableProps) {
       <div className="overflow-x-auto">
         <table className="w-full min-w-[56rem] border-collapse">
           <thead>
-            <tr className="border-b border-white/10 text-left text-[0.68rem] uppercase tracking-[0.24em] text-(--text-secondary-dark)">
+            <tr className="border-b border-[color:var(--border-dark)] text-left text-[0.68rem] uppercase tracking-[0.24em] text-(--text-secondary-dark)">
               <th className="px-6 py-4 font-semibold">Race</th>
               <th className="px-6 py-4 font-semibold">Date</th>
               <th className="px-6 py-4 font-semibold">City</th>
@@ -90,7 +90,7 @@ export function RaceTable({ races }: RaceTableProps) {
               return (
                 <tr
                   key={race.id}
-                  className="border-b border-white/8 text-sm text-(--text-secondary-dark)"
+                  className="border-b border-[color:var(--border-dark)] text-sm text-(--text-secondary-dark)"
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">

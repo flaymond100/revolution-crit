@@ -16,7 +16,7 @@ export function SectionIntro({
   actionTo,
 }: SectionIntroProps) {
   return (
-    <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+    <div className="section-intro flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
       <div className="max-w-2xl">
         {eyebrow && <span className="eyebrow">{eyebrow}</span>}
         <h2 className="mt-4 font-heading text-3xl font-semibold text-(--text-primary-dark) sm:text-4xl">

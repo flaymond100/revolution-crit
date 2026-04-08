@@ -7,7 +7,11 @@ import { toRaceItems } from '../lib/racePresentation';
 import { RaceTable } from '../components/RaceTable';
 
 export function HomePage() {
-  const { data: raceCalendar } = useQuery({
+  const {
+    data: raceCalendar,
+    isLoading: isRaceCalendarLoading,
+    isError: isRaceCalendarError,
+  } = useQuery({
     queryKey: ['race-calendar'],
     queryFn: fetchRaceCalendars,
   });
@@ -22,24 +26,27 @@ export function HomePage() {
       }).format(new Date(races[0].date))
     : 'Date TBA';
 
-  console.log(races);
   return (
     <div className="page-shell">
-      <section className="hero-grid overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,0.28),transparent_34%),radial-gradient(circle_at_85%_0%,rgba(0,212,255,0.22),transparent_26%),linear-gradient(135deg,rgba(20,28,39,0.98),rgba(11,15,20,0.92))] px-6 py-8 sm:px-10 sm:py-12 lg:px-14 lg:py-16">
+      <section className="hero-grid home-hero-section overflow-hidden rounded-[2rem] border border-[color:var(--border-dark)] px-6 py-8 sm:px-10 sm:py-12 lg:px-14 lg:py-16">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:gap-12">
           <div className="relative">
             <h1 className="mt-5 max-w-3xl font-heading text-4xl font-semibold leading-[1.02] text-(--text-primary-dark) sm:text-5xl lg:text-7xl">
-              Wir wollen den deutschen Straßenradsport
-              <span className="block text-(--accent-secondary)">
-                revolutionieren!
-              </span>
+              We want to
             </h1>
+            <span className="mt-5 max-w-3xl font-heading text-4xl font-semibold leading-[1] text-(--accent-secondary) sm:text-5xl lg:text-7xl">
+              revolutionise
+            </span>
+            <h1 className="mt-5 max-w-3xl font-heading text-4xl font-semibold leading-[1.02] text-(--text-primary-dark) sm:text-5xl lg:text-7xl">
+              road cycling in Germany!
+            </h1>
+
             <p className="mt-6 max-w-2xl text-base leading-7 text-(--text-secondary-dark) sm:text-lg">
-              Kurze spektakuläre Radrennen durch die Straßenschluchten deutscher
-              Innenstädte. Foodtrucks, Moderation, Musik, Rennaction... die
-              Zuschauer*innen sollen etwas geboten bekommen. Die Sportler*innen
-              sollen vor Publikum ihre Kurven-Skills und Sprintfähigkeiten
-              zeigen.
+              Short, spectacular bike races through the urban canyons of German
+              city centres. Food trucks, commentary, music, racing action... the
+              spectators are in for a treat. The riders will get to show off
+              their cornering skills and sprinting abilities in front of a live
+              audience.
             </p>
 
             {/* <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -75,7 +82,7 @@ export function HomePage() {
           </div>
 
           <div className="grid gap-4 self-end">
-            <div className="hero-highlight-card rounded-[1.75rem] border border-white/10 p-5 sm:p-6">
+            <div className="hero-highlight-card rounded-[1.75rem] border border-[color:var(--border-dark)] p-5 sm:p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.26em] text-(--accent-secondary)">
                 Upcoming Highlight
               </p>
@@ -124,8 +131,24 @@ export function HomePage() {
       </section>
 
       <section className="space-y-6" aria-label="Race table">
-        <SectionIntro eyebrow="Race Calendar" title="" description="" />
-        <RaceTable races={raceCalendar ?? []} />
+        <SectionIntro
+          eyebrow="Race Calendar"
+          title="Upcoming races"
+          description="Browse planned events and registration status."
+        />
+
+        {isRaceCalendarLoading ? (
+          <div className="surface-panel p-6 text-sm text-(--text-secondary-dark) sm:p-8">
+            Loading race calendar...
+          </div>
+        ) : isRaceCalendarError ? (
+          <div className="surface-panel p-6 text-sm text-(--text-secondary-dark) sm:p-8">
+            Race calendar is temporarily unavailable. Please try again in a
+            moment.
+          </div>
+        ) : (
+          <RaceTable races={raceCalendar ?? []} />
+        )}
       </section>
 
       <section className="space-y-6">
