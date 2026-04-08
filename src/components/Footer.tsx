@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 
-const secondaryLinks = [
-  { label: 'Training Camp', to: '/training-camp' },
+const secondaryLinks: { label: string; to: string }[] = [
+  // { label: 'Training Camp', to: '/training-camp' },
   { label: 'Partners', to: '/partners' },
   { label: 'Contact', to: '/contact' },
-  { label: 'FAQ', to: '/faq' },
+  // { label: 'FAQ', to: '/faq' },
 ];
 
 const legalLinks = [
@@ -25,10 +25,13 @@ export function Footer() {
             </span>
             <div>
               <h2 className="font-heading text-2xl font-semibold text-[color:var(--text-primary-dark)]">
-                Urban racing, clearer schedules, faster sign-ups.
+                Making racing more accessible, engaging and rewarding for all
+                riders.
               </h2>
               <p className="mt-3 max-w-xl text-sm text-[color:var(--text-secondary-dark)] sm:text-base">
-                A modular race-series platform built for mobile-first event discovery, category clarity, results, and strong rider conversion.
+                Critirium races across Sachsen for all levels of racers, from
+                first-timers to seasoned pros, with a focus on community, fun
+                and development.
               </p>
             </div>
           </div>
@@ -38,13 +41,15 @@ export function Footer() {
               Explore
             </h3>
             <ul className="mt-4 space-y-3 text-sm text-[color:var(--text-secondary-dark)]">
-              {secondaryLinks.map((link) => (
-                <li key={link.to}>
-                  <Link className="footer-link" to={link.to}>
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              {secondaryLinks.length > 0
+                ? secondaryLinks.map(link => (
+                    <li key={link.to}>
+                      <Link className="footer-link" to={link.to}>
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))
+                : null}
             </ul>
           </div>
 
@@ -53,7 +58,7 @@ export function Footer() {
               Legal
             </h3>
             <ul className="mt-4 space-y-3 text-sm text-[color:var(--text-secondary-dark)]">
-              {legalLinks.map((link) => (
+              {legalLinks.map(link => (
                 <li key={link.to}>
                   <Link className="footer-link" to={link.to}>
                     {link.label}
@@ -65,8 +70,8 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col gap-3 border-t border-[color:var(--border-dark)] pt-6 text-xs uppercase tracking-[0.18em] text-[color:var(--text-secondary-dark)] sm:flex-row sm:items-center sm:justify-between">
-          <p>Revolution Crit. Built for race weekends and quick decisions.</p>
-          <p>Series shell v1.0</p>
+          <p></p>
+          <p>Revolution Crit &copy; {new Date().getFullYear()}</p>
         </div>
       </div>
     </footer>

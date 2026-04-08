@@ -4,18 +4,18 @@ import logoImg from '../../public/assets/logo.png';
 
 const primaryLinks = [
   { label: 'Home', to: '/' },
-  { label: 'Races', to: '/races' },
+  { label: 'Calendar', to: '/calendar' },
   { label: 'Results', to: '/results' },
   // { label: 'Categories', to: '/categories' },
-  { label: 'Gallery', to: '/gallery' },
+  // { label: 'Gallery', to: '/gallery' },
   { label: 'About', to: '/about' },
 ];
 
-const utilityLinks = [
-  { label: 'Training Camp', to: '/training-camp' },
-  { label: 'Partners', to: '/partners' },
-  { label: 'FAQ', to: '/faq' },
-];
+// const utilityLinks = [
+//   { label: 'Training Camp', to: '/training-camp' },
+//   { label: 'Partners', to: '/partners' },
+//   { label: 'FAQ', to: '/faq' },
+// ];
 
 function navLinkClass(isActive: boolean) {
   return [
@@ -58,7 +58,7 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <nav aria-label="Secondary" className="flex items-center gap-1">
+          {/* <nav aria-label="Secondary" className="flex items-center gap-1">
             {utilityLinks.map(link => (
               <NavLink
                 key={link.to}
@@ -75,9 +75,9 @@ export function Header() {
                 {link.label}
               </NavLink>
             ))}
-          </nav>
+          </nav> */}
 
-          {/* <Link className="cta-button" to="/races">
+          {/* <Link className="cta-button" to="/calendar">
             Register Now
           </Link> */}
         </div>
@@ -132,7 +132,7 @@ export function Header() {
               aria-label="Mobile secondary"
               className="grid gap-2 border-t border-[color:var(--border-dark)] pt-5"
             >
-              {utilityLinks.map(link => (
+              {/* {utilityLinks.map(link => (
                 <NavLink
                   key={link.to}
                   className={({ isActive }) =>
@@ -147,10 +147,13 @@ export function Header() {
                 >
                   {link.label}
                 </NavLink>
-              ))}
+              ))} */}
             </nav>
 
-            <Link className="cta-button justify-center text-center" to="/races">
+            <Link
+              className="cta-button justify-center text-center"
+              to="/calendar"
+            >
               View Upcoming Races
             </Link>
           </div>

@@ -4,9 +4,8 @@ import { Link, useParams } from 'react-router-dom';
 import { RaceCard } from '../components/RaceCard';
 import { RaceTable } from '../components/RaceTable';
 import { SectionIntro } from '../components/SectionIntro';
-import { raceCalendar } from '../data/races';
 import { fetchRaceCalendars } from '../lib/raceCalendar';
-import { toFallbackRaceCalendars, toRaceItems } from '../lib/racePresentation';
+import { toRaceItems } from '../lib/racePresentation';
 import type { RaceCalendar } from '../types';
 
 function sortRacesByDate(races: RaceCalendar[]): RaceCalendar[] {
@@ -75,10 +74,8 @@ export function RacesPage() {
     queryFn: fetchRaceCalendars,
   });
 
-  const tableRaces = sortRacesByDate(
-    data && data.length > 0 ? data : toFallbackRaceCalendars(raceCalendar)
-  );
-  const races = data && data.length > 0 ? toRaceItems(data) : raceCalendar;
+  const tableRaces = sortRacesByDate(data ?? []);
+  const races = toRaceItems(data ?? []);
 
   if (isLoading) {
     return (
@@ -139,7 +136,7 @@ export function RacesPage() {
   return (
     <section className="page-shell">
       <section className="space-y-6" aria-label="Race table">
-        <SectionIntro eyebrow="" title="Calendar table" description="" />
+        <SectionIntro eyebrow="" title="Race Calendar" description="" />
         <RaceTable races={tableRaces} />
       </section>
 
@@ -182,18 +179,9 @@ export function RaceDetailPage() {
     queryFn: fetchRaceCalendars,
   });
 
-  const fallbackRaces = useMemo(
-    () => toFallbackRaceCalendars(raceCalendar),
-    []
-  );
   const race = useMemo(() => {
-    const fromRemote = data?.find(item => item.id === slug);
-    if (fromRemote) {
-      return fromRemote;
-    }
-
-    return fallbackRaces.find(item => item.id === slug);
-  }, [data, fallbackRaces, slug]);
+    return data?.find(item => item.id === slug);
+  }, [data, slug]);
 
   const sortedSubRaces = useMemo(() => {
     if (!race?.subRaces) {
@@ -222,32 +210,6 @@ export function RaceDetailPage() {
       setSelectedSubRaceId(sortedSubRaces[0].id);
     }
   }, [selectedSubRaceId, sortedSubRaces]);
-
-  const selectedSubRace =
-    sortedSubRaces.find(subRace => subRace.id === selectedSubRaceId) ??
-    sortedSubRaces[0];
-
-  const entries = useMemo(() => {
-    if (!selectedSubRace?.entries) {
-      return [];
-    }
-
-    return [...selectedSubRace.entries].sort((a, b) => {
-      if (a.position == null && b.position == null) {
-        return 0;
-      }
-
-      if (a.position == null) {
-        return 1;
-      }
-
-      if (b.position == null) {
-        return -1;
-      }
-
-      return a.position - b.position;
-    });
-  }, [selectedSubRace]);
 
   const formattedDate = useMemo(() => {
     if (!race?.raceDate) {
@@ -306,7 +268,7 @@ export function RaceDetailPage() {
             We could not find a race for identifier {slug ?? 'unknown-race'}.
           </p>
           <div className="mx-auto mt-8 flex max-w-sm flex-col gap-3 sm:flex-row sm:justify-center">
-            <Link className="cta-button w-full justify-center" to="/races">
+            <Link className="cta-button w-full justify-center" to="/calendar">
               Back to races
             </Link>
             <Link className="ghost-button w-full justify-center" to="/contact">
@@ -326,27 +288,19 @@ export function RaceDetailPage() {
           {race.name}
         </h1>
         <p className="mt-5 max-w-3xl text-base leading-7 text-(--text-secondary-dark)">
-          {raceTypeLabel} at {race.location}. Date: {formattedDate}. Browse
-          sub-race tabs to inspect registered participants and race result
-          information.
+          {raceTypeLabel} at {race.location}. Date: {formattedDate}.
         </p>
 
         <div className="mt-7 flex flex-col gap-3 sm:flex-row">
           {race.externalRegistrationUrl ? (
             <Link
               className="cta-button w-full justify-center sm:w-auto"
-              to={`/races/${race.id}/register`}
+              target="_blank"
+              to={race.externalRegistrationUrl}
             >
               Register now
             </Link>
-          ) : (
-            <Link
-              className="cta-button w-full justify-center sm:w-auto"
-              to={`/races/${race.id}/register`}
-            >
-              Register now
-            </Link>
-          )}
+          ) : null}
           {race.externalResultsUrl ? (
             <a
               className="ghost-button w-full justify-center sm:w-auto"
@@ -356,113 +310,9 @@ export function RaceDetailPage() {
             >
               External results
             </a>
-          ) : (
-            <Link
-              className="ghost-button w-full justify-center sm:w-auto"
-              to="/results"
-            >
-              Open results hub
-            </Link>
-          )}
+          ) : null}
         </div>
       </div>
-
-      <section className="space-y-6" aria-label="Categories participants">
-        <SectionIntro
-          eyebrow="Categories"
-          title="Participants by category"
-          description="Select a category tab to view participants, registration status, and timing details."
-        />
-
-        {sortedSubRaces.length === 0 ? (
-          <div className="surface-panel p-6 text-sm text-(--text-secondary-dark) sm:p-8">
-            No categories are configured for this event yet.
-          </div>
-        ) : (
-          <div className="surface-panel overflow-hidden">
-            <div className="flex gap-2 overflow-x-auto border-b border-white/10 px-4 py-4 sm:px-6">
-              {sortedSubRaces.map(subRace => {
-                const isActive = subRace.id === selectedSubRace?.id;
-
-                return (
-                  <button
-                    key={subRace.id}
-                    type="button"
-                    onClick={() => setSelectedSubRaceId(subRace.id)}
-                    className={[
-                      'rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition',
-                      isActive
-                        ? 'border-[color:var(--accent-cta)] bg-[color:var(--accent-cta)]/18 text-(--text-primary-dark)'
-                        : 'border-white/10 bg-white/5 text-(--text-secondary-dark) hover:border-white/25 hover:text-(--text-primary-dark)',
-                    ].join(' ')}
-                  >
-                    {subRace.name}
-                  </button>
-                );
-              })}
-            </div>
-
-            {entries.length === 0 ? (
-              <div className="px-6 py-8 text-sm text-(--text-secondary-dark) sm:px-8">
-                No participants available for{' '}
-                {selectedSubRace?.name ?? 'this sub-race'} yet.
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[64rem] border-collapse">
-                  <thead>
-                    <tr className="border-b border-white/10 text-left text-[0.68rem] uppercase tracking-[0.24em] text-(--text-secondary-dark)">
-                      <th className="px-6 py-4 font-semibold">Pos</th>
-                      <th className="px-6 py-4 font-semibold">Bib</th>
-                      <th className="px-6 py-4 font-semibold">Participant</th>
-                      <th className="px-6 py-4 font-semibold">Team</th>
-                      <th className="px-6 py-4 font-semibold">Nationality</th>
-                      <th className="px-6 py-4 font-semibold">Status</th>
-                      <th className="px-6 py-4 font-semibold">Time</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {entries.map(entry => (
-                      <tr
-                        key={entry.id}
-                        className="border-b border-white/8 text-sm text-(--text-secondary-dark)"
-                      >
-                        <td className="px-6 py-4 text-(--text-primary-dark)">
-                          {entry.position ?? '-'}
-                        </td>
-                        <td className="px-6 py-4 text-(--text-primary-dark)">
-                          {entry.bibNumber ?? '-'}
-                        </td>
-                        <td className="px-6 py-4">
-                          <p className="text-(--text-primary-dark)">
-                            {entry.participant?.fullName ??
-                              `Participant ${entry.participantId.slice(0, 8)}`}
-                          </p>
-                          <p className="text-xs text-(--text-secondary-dark)">
-                            {entry.participant?.email ?? 'No contact email'}
-                          </p>
-                        </td>
-                        <td className="px-6 py-4 text-(--text-primary-dark)">
-                          {entry.participant?.teamName ?? '-'}
-                        </td>
-                        <td className="px-6 py-4 text-(--text-primary-dark)">
-                          {entry.participant?.nationality ?? '-'}
-                        </td>
-                        <td className="px-6 py-4 text-(--text-primary-dark)">
-                          {entry.status ?? 'registered'}
-                        </td>
-                        <td className="px-6 py-4 text-(--text-primary-dark)">
-                          {entry.timeText ?? '-'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-      </section>
     </section>
   );
 }
@@ -470,16 +320,12 @@ export function RaceDetailPage() {
 export function ResultsPage() {
   return (
     <PlaceholderPage
-      ctaLabel="Open 2026 season"
+      ctaLabel=""
       ctaTo="/results/2026"
-      description="The results hub is structured for season navigation, clean tables, race drill-down, and future live timing integrations."
-      eyebrow="Results hub"
-      highlights={[
-        'Designed for season selection and quick jump links.',
-        'Prepared for clean standings tables and searchable datasets.',
-        'Can support both overall series standings and single-race results.',
-      ]}
-      title="Results with a clearer hierarchy."
+      description="Results will be posted once the first race is completed."
+      eyebrow="2026 results"
+      highlights={[]}
+      title="Results"
     />
   );
 }
@@ -625,13 +471,9 @@ export function TrainingCampPage() {
 export function PartnersPage() {
   return (
     <PlaceholderPage
-      description="Partner and sponsor content can live here with room for packages, brand visibility opportunities, and event support messaging."
+      description=""
       eyebrow="Partners"
-      highlights={[
-        'Suitable for logo systems, sponsorship tiers, and contact prompts.',
-        'Maintains a cleaner separation from rider-facing competition pages.',
-        'Supports storytelling for equipment, venue, and media partners.',
-      ]}
+      highlights={[]}
       title="Partners"
     />
   );
@@ -640,13 +482,9 @@ export function PartnersPage() {
 export function ContactPage() {
   return (
     <PlaceholderPage
-      description="The contact route is prepared for rider support, partner inquiries, and organizer communication patterns."
+      description={`Feel free to reach out by email at ${'contact@revolutioncrit.com'}.`}
       eyebrow="Contact"
-      highlights={[
-        'Can split contact intents across riders, media, and partners.',
-        'Ready for future form handling and validation flows.',
-        'Useful destination for CTA overflow before registration is wired.',
-      ]}
+      highlights={[]}
       title="Contact"
     />
   );

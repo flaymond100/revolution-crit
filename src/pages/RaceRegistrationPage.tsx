@@ -234,7 +234,7 @@ export function RaceRegistrationPage() {
 
     const baseUrl = window.location.origin;
     const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
-    const returnPath = `${basePath}/races/${race.id}/register`;
+    const returnPath = `${basePath}/calendar/${race.id}/register`;
 
     try {
       const { checkoutUrl } = await paymentMutation.mutateAsync({
@@ -297,7 +297,7 @@ export function RaceRegistrationPage() {
             unpublished or the link is incorrect.
           </p>
           <div className="mx-auto mt-8 flex max-w-sm flex-col gap-3 sm:flex-row sm:justify-center">
-            <Link className="cta-button w-full justify-center" to="/races">
+            <Link className="cta-button w-full justify-center" to="/calendar">
               Back to races
             </Link>
             <Link className="ghost-button w-full justify-center" to="/contact">
@@ -358,7 +358,7 @@ export function RaceRegistrationPage() {
             </div>
             <Link
               className="ghost-button hidden sm:inline-flex"
-              to={`/races/${race.id}`}
+              to={`/calendar/${race.id}`}
             >
               Back to race
             </Link>
@@ -602,7 +602,7 @@ export function RaceRegistrationPage() {
             </button>
             <Link
               className="ghost-button w-full justify-center"
-              to={`/races/${race.id}`}
+              to={`/calendar/${race.id}`}
             >
               Cancel
             </Link>

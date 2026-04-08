@@ -40,11 +40,11 @@ function App() {
       <Routes>
         <Route element={<AppLayout />}>
           <Route element={<HomePage />} path="/" />
-          <Route element={<RacesPage />} path="/races" />
-          <Route element={<RaceDetailPage />} path="/races/:slug" />
+          <Route element={<RacesPage />} path="/calendar" />
+          <Route element={<RaceDetailPage />} path="/calendar/:slug" />
           <Route
             element={<RaceRegistrationPage />}
-            path="/races/:slug/register"
+            path="/calendar/:slug/register"
           />
           <Route element={<ResultsPage />} path="/results" />
           <Route element={<ResultsSeasonPage />} path="/results/:season" />

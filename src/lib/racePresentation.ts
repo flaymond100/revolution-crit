@@ -41,15 +41,15 @@ function parseCity(location: string): string {
 
 function registrationStatus(race: RaceCalendar): RaceRegistrationStatus {
   if (!race.externalRegistrationUrl) {
-    return 'Closed';
+    return 'Registration Closed';
   }
 
   const raceDate = new Date(race.raceDate);
   if (!Number.isNaN(raceDate.getTime()) && raceDate.getTime() < Date.now()) {
-    return 'Closed';
+    return 'Registration Closed';
   }
 
-  return 'Entries open';
+  return 'Registration Open';
 }
 
 export function toRaceItem(race: RaceCalendar, index: number): RaceItem {
@@ -67,7 +67,9 @@ export function toRaceItem(race: RaceCalendar, index: number): RaceItem {
     venue: race.location,
     description: `${raceTitle} - ${typeLabel} event in ${race.location}.`,
     categories: categoryNames.length > 0 ? categoryNames : ['Open'],
-    format: categoryNames.length > 0 ? `${categoryNames.length} categories` : 'TBA',
+    format:
+      categoryNames.length > 0 ? `${categoryNames.length} categories` : 'TBA',
+    externalRegistrationUrl: race.externalRegistrationUrl ?? undefined,
     registrationStatus: registrationStatus(race),
     cover: raceCovers[index % raceCovers.length],
   };
@@ -79,15 +81,17 @@ export function toRaceItems(races: RaceCalendar[]): RaceItem[] {
 
 export function toFallbackRaceCalendars(items: RaceItem[]): RaceCalendar[] {
   return items.map(item => {
-    const subRaces: RaceSubRace[] = item.categories.map((category, subRaceIndex) => ({
-      id: `${item.id}-${subRaceIndex + 1}`,
-      raceCalendarId: item.id,
-      name: category,
-      sortOrder: subRaceIndex + 1,
-      entries: [],
-      createdAt: '',
-      updatedAt: '',
-    }));
+    const subRaces: RaceSubRace[] = item.categories.map(
+      (category, subRaceIndex) => ({
+        id: `${item.id}-${subRaceIndex + 1}`,
+        raceCalendarId: item.id,
+        name: category,
+        sortOrder: subRaceIndex + 1,
+        entries: [],
+        createdAt: '',
+        updatedAt: '',
+      })
+    );
 
     return {
       id: item.id,
@@ -96,7 +100,8 @@ export function toFallbackRaceCalendars(items: RaceItem[]): RaceCalendar[] {
       type: 'criterium',
       location: `${item.city}, ${item.venue}`,
       externalResultsUrl: null,
-      externalRegistrationUrl: item.registrationStatus === 'Closed' ? null : '#',
+      externalRegistrationUrl:
+        item.registrationStatus === 'Registration Closed' ? null : '#',
       subRaces,
       createdAt: '',
       updatedAt: '',
