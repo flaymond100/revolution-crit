@@ -90,7 +90,7 @@ export function Header() {
         <Link to="/" aria-label="Revolution Crit home">
           <img
             alt="Revolution Crit"
-            className="max-h-12.5"
+            className="max-h-10 rounded-sm"
             src={logoImg}
           />{' '}
         </Link>

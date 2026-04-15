@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { RaceCard } from '../components/RaceCard';
 import { RaceTable } from '../components/RaceTable';
@@ -19,7 +19,7 @@ function sortRacesByDate(races: RaceCalendar[]): RaceCalendar[] {
 type PlaceholderPageProps = {
   eyebrow: string;
   title: string;
-  description: string;
+  description: ReactNode;
   highlights: string[];
   ctaLabel?: string;
   ctaTo?: string;
@@ -482,7 +482,17 @@ export function PartnersPage() {
 export function ContactPage() {
   return (
     <PlaceholderPage
-      description={`Feel free to reach out by email at ${'contact@revolutioncrit.com'}.`}
+      description={
+        <>
+          Feel free to reach out by email at{' '}
+          <a
+            className="text-(--accent-secondary) underline underline-offset-4 transition hover:opacity-85"
+            href="mailto:kontakt@rsc-nordsachen.de"
+          >
+            kontakt@rsc-nordsachen.de
+          </a>
+        </>
+      }
       eyebrow="Contact"
       highlights={[]}
       title="Contact"
