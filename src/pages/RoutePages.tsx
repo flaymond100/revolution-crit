@@ -562,15 +562,103 @@ export function TermsPage() {
 
 export function WithdrawalPage() {
   return (
-    <PlaceholderPage
-      description="Withdrawal information placeholder for legal compliance and consumer rights copy where applicable."
-      eyebrow="Legal"
-      highlights={[
-        'Route is wired and linked in the footer.',
-        'Ready for static content migration.',
-        'Completes the requested legal route set.',
-      ]}
-      title="Withdrawal"
-    />
+    <section className="page-shell">
+      <div className="surface-panel px-6 py-8 sm:px-8 sm:py-10">
+        <span className="eyebrow">Legal</span>
+        <h1 className="mt-4 font-heading text-4xl font-semibold text-(--text-primary-dark) sm:text-5xl">
+          Impressum &amp; Haftungsausschluss
+        </h1>
+
+        <section className="mt-8 space-y-4 text-base leading-7 text-(--text-secondary-dark)">
+          <h2 className="font-heading text-2xl font-semibold text-(--text-primary-dark)">
+            Impressum
+          </h2>
+          <p>Rechtliche Angaben gemäß §5 TMG</p>
+
+          <p>
+            Diensteanbieter:
+            <br />
+            RSC (Radsportclub) Nordsachsen e.V.
+            <br />
+            Breite Straße 27
+            <br />
+            04509 Delitzsch
+          </p>
+
+          <p>
+            Kontaktmöglichkeiten:
+            <br />
+            E-Mail-Adresse: kontakt@rsc-nordsachsen.de
+            <br />
+            Telefon: 015115535786
+          </p>
+
+          <p>
+            Vertretungsberechtigte Person:
+            <br />
+            Erik Heidrich, 1. Vorsitzender
+          </p>
+        </section>
+
+        <section className="mt-10 space-y-4 text-base leading-7 text-(--text-secondary-dark)">
+          <h2 className="font-heading text-2xl font-semibold text-(--text-primary-dark)">
+            Haftungsausschluss
+          </h2>
+
+          <h3 className="font-heading text-xl font-semibold text-(--text-primary-dark)">
+            Haftung für Inhalte
+          </h3>
+          <p>
+            Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte
+            auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach
+            §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht
+            verpflichtet, übermittelte oder gespeicherte fremde Informationen zu
+            überwachen oder nach Umständen zu forschen, die auf eine
+            rechtswidrige Tätigkeit hinweisen. Verpflichtungen zur Entfernung
+            oder Sperrung der Nutzung von Informationen nach den allgemeinen
+            Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist
+            jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten
+            Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden
+            Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.
+          </p>
+
+          <h3 className="font-heading text-xl font-semibold text-(--text-primary-dark)">
+            Haftung für Links
+          </h3>
+          <p>
+            Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren
+            Inhalte wir keinen Einfluss haben. Deshalb können wir für diese
+            fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der
+            verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber
+            der Seiten verantwortlich. Die verlinkten Seiten wurden zum
+            Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft.
+            Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht
+            erkennbar. Eine permanente inhaltliche Kontrolle der verlinkten
+            Seiten ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung
+            nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werden wir
+            derartige Links umgehend entfernen.
+          </p>
+
+          <h3 className="font-heading text-xl font-semibold text-(--text-primary-dark)">
+            Urheberrecht
+          </h3>
+          <p>
+            Die durch die Seitenbetreiber erstellten Inhalte und Werke auf
+            diesen Seiten unterliegen dem deutschen Urheberrecht. Die
+            Vervielfältigung, Bearbeitung, Verbreitung und jede Art der
+            Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der
+            schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.
+            Downloads und Kopien dieser Seite sind nur für den privaten, nicht
+            kommerziellen Gebrauch gestattet. Soweit die Inhalte auf dieser
+            Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte
+            Dritter beachtet. Insbesondere werden Inhalte Dritter als solche
+            gekennzeichnet. Sollten Sie trotzdem auf eine
+            Urheberrechtsverletzung aufmerksam werden, bitten wir um einen
+            entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen
+            werden wir derartige Inhalte umgehend entfernen.
+          </p>
+        </section>
+      </div>
+    </section>
   );
 }
