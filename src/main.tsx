@@ -4,7 +4,7 @@ import App from './App';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
-  <BrowserRouter basename="/revolution-crit">
+  <BrowserRouter basename="/">
     <App />
-  </BrowserRouter>,
+  </BrowserRouter>
 );
