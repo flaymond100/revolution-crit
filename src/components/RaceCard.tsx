@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import type { RaceRegistrationStatus } from '../data/races';
 
 type RaceCardProps = {
   id: string;
@@ -10,7 +11,7 @@ type RaceCardProps = {
   description: string;
   categories: string[];
   format: string;
-  registrationStatus: string;
+  registrationStatus: RaceRegistrationStatus;
   featured?: boolean;
 };
 
@@ -20,17 +21,19 @@ export function RaceCard({
   title,
   date,
   city,
-  venue,
-  description,
-  format,
   registrationStatus,
   featured = false,
 }: RaceCardProps) {
+  const isRegistrationOpen = registrationStatus === 'Registration Open';
+
   return (
     <article
       className={[
         'race-card group flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-[color:var(--border-dark)] p-5 sm:p-6',
         featured ? 'race-card-featured' : 'race-card-default',
+        isRegistrationOpen
+          ? 'border-emerald-400/75 bg-emerald-500/12 shadow-[0_0_0_1px_rgba(74,222,128,0.28),0_24px_48px_-28px_rgba(16,185,129,0.6)]'
+          : '',
       ].join(' ')}
     >
       <div className="flex items-start justify-between gap-4">
@@ -62,12 +65,6 @@ export function RaceCard({
         </div>
       </div>
 
-      <p className="mt-2 text-sm text-(--text-secondary-dark)">{venue}</p>
-
-      <p className="mt-5 text-sm leading-6 text-(--text-secondary-dark)">
-        {description}
-      </p>
-
       {/* <div className="mt-5 flex flex-wrap gap-2">
         {categories.map(category => (
           <span key={category} className="filter-chip">
@@ -77,17 +74,8 @@ export function RaceCard({
       </div> */}
 
       <div className="mt-6 flex items-center justify-between gap-3 border-t border-[color:var(--border-dark)] pt-5">
-        <div>
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-(--text-secondary-dark)">
-            Format
-          </p>
-          <p className="mt-1 text-sm font-medium text-(--text-primary-dark)">
-            {format}
-          </p>
-        </div>
-
         <Link className="race-card-link" to={`/calendar/${id}`}>
-          Open Race
+          Race Details
         </Link>
       </div>
     </article>
