@@ -131,11 +131,9 @@ export function HomePage() {
       </section>
 
       <section className="space-y-6" aria-label="Race table">
-        <SectionIntro
-          eyebrow="Race Calendar"
-          title="Upcoming races"
-          description="Browse planned events and registration status."
-        />
+        <h2 className="mt-4 font-heading text-3xl font-semibold text-(--text-primary-dark) sm:text-4xl">
+          Race Calendar
+        </h2>
 
         {isRaceCalendarLoading ? (
           <div className="surface-panel p-6 text-sm text-(--text-secondary-dark) sm:p-8">

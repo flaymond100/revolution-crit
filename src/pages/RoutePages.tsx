@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { RaceCard } from '../components/RaceCard';
 import { RaceTable } from '../components/RaceTable';
-import { SectionIntro } from '../components/SectionIntro';
 import { fetchRaceCalendars } from '../lib/raceCalendar';
 import { toRaceItems } from '../lib/racePresentation';
 import type { RaceCalendar } from '../types';
@@ -136,7 +135,9 @@ export function RacesPage() {
   return (
     <section className="page-shell">
       <section className="space-y-6" aria-label="Race table">
-        <SectionIntro eyebrow="" title="Race Calendar" description="" />
+        <h2 className="mt-4 font-heading text-3xl font-semibold text-(--text-primary-dark) sm:text-4xl">
+          Race Calendar
+        </h2>
         <RaceTable races={tableRaces} />
       </section>
 
