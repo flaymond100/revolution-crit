@@ -166,7 +166,6 @@ export function HomePage() {
               key={race.id}
               categories={race.categories}
               city={race.city}
-              cover={race.cover}
               date={race.date}
               description={race.description}
               featured={index === 0}
