@@ -22,7 +22,6 @@ import {
   ResultsSeasonPage,
   TermsPage,
   TrainingCampPage,
-  WithdrawalPage,
 } from './pages/RoutePages';
 
 const queryClient = new QueryClient({
@@ -67,7 +66,6 @@ function App() {
           <Route element={<ImprintPage />} path="/imprint" />
           <Route element={<PrivacyPage />} path="/privacy" />
           <Route element={<TermsPage />} path="/terms" />
-          <Route element={<WithdrawalPage />} path="/withdrawal" />
           <Route element={<Navigate replace to="/" />} path="*" />
         </Route>
       </Routes>

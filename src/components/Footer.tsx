@@ -11,7 +11,6 @@ const legalLinks = [
   { label: 'Imprint', to: '/imprint' },
   { label: 'Privacy', to: '/privacy' },
   { label: 'Terms', to: '/terms' },
-  { label: 'Withdrawal', to: '/withdrawal' },
 ];
 
 export function Footer() {

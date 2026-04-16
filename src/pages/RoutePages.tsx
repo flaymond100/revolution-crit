@@ -517,51 +517,6 @@ export function FaqPage() {
 
 export function ImprintPage() {
   return (
-    <PlaceholderPage
-      description="Legal disclosure placeholder for required imprint content."
-      eyebrow="Legal"
-      highlights={[
-        'Route exists and is available from the shared footer.',
-        'Prepared for static legal copy migration.',
-        'Keeps compliance content outside the primary event flow.',
-      ]}
-      title="Imprint"
-    />
-  );
-}
-
-export function PrivacyPage() {
-  return (
-    <PlaceholderPage
-      description="Privacy policy placeholder ready for the migrated legal copy and any data handling notes tied to registration or analytics."
-      eyebrow="Legal"
-      highlights={[
-        'Future-ready for privacy copy and processor disclosures.',
-        'Linked globally from the footer.',
-        'Sits in the same design system as the rest of the site.',
-      ]}
-      title="Privacy policy"
-    />
-  );
-}
-
-export function TermsPage() {
-  return (
-    <PlaceholderPage
-      description="Terms placeholder for future event terms, platform conditions, or ticketing-related policies."
-      eyebrow="Legal"
-      highlights={[
-        'Prepared for static legal text migration.',
-        'Completes the requested footer legal stack.',
-        'Uses the same accessible shell as other static pages.',
-      ]}
-      title="Terms"
-    />
-  );
-}
-
-export function WithdrawalPage() {
-  return (
     <section className="page-shell">
       <div className="surface-panel px-6 py-8 sm:px-8 sm:py-10">
         <span className="eyebrow">Legal</span>
@@ -660,5 +615,35 @@ export function WithdrawalPage() {
         </section>
       </div>
     </section>
+  );
+}
+
+export function PrivacyPage() {
+  return (
+    <PlaceholderPage
+      description="Privacy policy placeholder ready for the migrated legal copy and any data handling notes tied to registration or analytics."
+      eyebrow="Legal"
+      highlights={[
+        'Future-ready for privacy copy and processor disclosures.',
+        'Linked globally from the footer.',
+        'Sits in the same design system as the rest of the site.',
+      ]}
+      title="Privacy policy"
+    />
+  );
+}
+
+export function TermsPage() {
+  return (
+    <PlaceholderPage
+      description="Terms placeholder for future event terms, platform conditions, or ticketing-related policies."
+      eyebrow="Legal"
+      highlights={[
+        'Prepared for static legal text migration.',
+        'Completes the requested footer legal stack.',
+        'Uses the same accessible shell as other static pages.',
+      ]}
+      title="Terms"
+    />
   );
 }
