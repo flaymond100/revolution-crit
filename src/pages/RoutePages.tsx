@@ -141,12 +141,6 @@ export function RacesPage() {
       </section>
 
       <section className="space-y-6" aria-label="Race cards">
-        <SectionIntro
-          eyebrow="Card preview"
-          title="Same race data, card-first for mobile users."
-          description="Cards reuse the same metadata with visual covers for fast thumb-scanning. They are ready to be reused on future filtered race views."
-        />
-
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {races.map((race, index) => (
             <RaceCard
