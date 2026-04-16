@@ -39,7 +39,7 @@ function parseCity(location: string): string {
   return city || location;
 }
 
-function registrationStatus(race: RaceCalendar): RaceRegistrationStatus {
+export function registrationStatus(race: RaceCalendar): RaceRegistrationStatus {
   if (!race.externalRegistrationUrl) {
     return 'Registration Closed';
   }

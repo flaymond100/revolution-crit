@@ -1,38 +1,10 @@
 import { Link } from 'react-router-dom';
 import type { RaceCalendar } from '../types';
+import { registrationStatus } from '../lib/racePresentation';
 
 type RaceTableProps = {
   races: RaceCalendar[];
 };
-
-function raceStatus(race: RaceCalendar): 'OPEN' | 'FINISHED' {
-  const raceDate = new Date(race.raceDate);
-  if (Number.isNaN(raceDate.getTime())) {
-    return 'OPEN';
-  }
-
-  const today = new Date();
-  const raceDay = new Date(
-    raceDate.getFullYear(),
-    raceDate.getMonth(),
-    raceDate.getDate()
-  ).getTime();
-  const todayDay = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate()
-  ).getTime();
-
-  return raceDay < todayDay ? 'FINISHED' : 'OPEN';
-}
-
-function statusClass(status: ReturnType<typeof raceStatus>) {
-  if (status === 'OPEN') {
-    return 'border-[color:var(--success)]/40 bg-[color:var(--success)]/15 text-[color:var(--text-primary-dark)]';
-  }
-
-  return 'border-[color:var(--border-dark)] bg-[color:var(--surface-soft)] text-[color:var(--text-secondary-dark)]';
-}
 
 function formatRaceDate(date: string): string {
   const parsed = new Date(date);
@@ -45,6 +17,15 @@ function formatRaceDate(date: string): string {
     month: 'short',
     year: 'numeric',
   }).format(parsed);
+}
+
+function statusClass(race: RaceCalendar) {
+  const status = registrationStatus(race);
+  if (status === 'Registration Open') {
+    return 'border-[color:var(--success)]/40 bg-[color:var(--success)]/15 text-[color:var(--text-primary-dark)]';
+  }
+
+  return 'border-[color:var(--border-dark)] bg-[color:var(--surface-soft)] text-[color:var(--text-secondary-dark)]';
 }
 
 function parseCity(location: string): string {
@@ -84,7 +65,6 @@ export function RaceTable({ races }: RaceTableProps) {
           </thead>
           <tbody>
             {races.map(race => {
-              const status = raceStatus(race);
               const city = parseCity(race.location);
 
               return (
@@ -117,9 +97,9 @@ export function RaceTable({ races }: RaceTableProps) {
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex rounded-full border px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] ${statusClass(status)}`}
+                      className={`inline-flex rounded-full border px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] ${statusClass(race)}`}
                     >
-                      {status}
+                      {registrationStatus(race)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
