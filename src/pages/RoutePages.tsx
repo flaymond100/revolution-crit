@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Link, useParams } from 'react-router-dom';
 import { RaceCard } from '../components/RaceCard';
 import { RaceTable } from '../components/RaceTable';
@@ -284,6 +285,68 @@ export function RaceDetailPage() {
         <p className="mt-5 max-w-3xl text-base leading-7 text-(--text-secondary-dark)">
           {raceTypeLabel} at {race.location}. Date: {formattedDate}.
         </p>
+
+        {race.description ? (
+          <div className="mt-6 max-w-3xl rounded-2xl border border-white/10 bg-white/5 px-4 py-4 sm:px-5 sm:py-5">
+            <ReactMarkdown
+              components={{
+                h1: ({ children }) => (
+                  <h2 className="mt-2 font-heading text-2xl font-semibold text-(--text-primary-dark)">
+                    {children}
+                  </h2>
+                ),
+                h2: ({ children }) => (
+                  <h3 className="mt-2 font-heading text-xl font-semibold text-(--text-primary-dark)">
+                    {children}
+                  </h3>
+                ),
+                h3: ({ children }) => (
+                  <h4 className="mt-2 font-heading text-lg font-semibold text-(--text-primary-dark)">
+                    {children}
+                  </h4>
+                ),
+                p: ({ children }) => (
+                  <p className="mt-3 text-sm leading-7 text-(--text-secondary-dark) sm:text-base">
+                    {children}
+                  </p>
+                ),
+                ul: ({ children }) => (
+                  <ul className="mt-3 list-disc space-y-1 pl-6 text-sm leading-7 text-(--text-secondary-dark) sm:text-base">
+                    {children}
+                  </ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="mt-3 list-decimal space-y-1 pl-6 text-sm leading-7 text-(--text-secondary-dark) sm:text-base">
+                    {children}
+                  </ol>
+                ),
+                li: ({ children }) => <li>{children}</li>,
+                a: ({ children, href }) => (
+                  <a
+                    className="text-(--accent-secondary) underline underline-offset-4 transition hover:opacity-85"
+                    href={href}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    {children}
+                  </a>
+                ),
+                blockquote: ({ children }) => (
+                  <blockquote className="mt-4 border-l-2 border-white/20 pl-4 text-sm italic text-(--text-secondary-dark) sm:text-base">
+                    {children}
+                  </blockquote>
+                ),
+                code: ({ children }) => (
+                  <code className="rounded bg-white/10 px-1.5 py-0.5 text-[0.9em] text-(--text-primary-dark)">
+                    {children}
+                  </code>
+                ),
+              }}
+            >
+              {race.description}
+            </ReactMarkdown>
+          </div>
+        ) : null}
 
         <div className="mt-7 flex flex-col gap-3 sm:flex-row">
           {race.externalRegistrationUrl ? (

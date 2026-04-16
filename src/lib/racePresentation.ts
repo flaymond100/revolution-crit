@@ -65,7 +65,7 @@ export function toRaceItem(race: RaceCalendar, index: number): RaceItem {
     date: formatRaceDate(race.raceDate),
     city,
     venue: race.location,
-    description: `${raceTitle} - ${typeLabel} event in ${race.location}.`,
+    description: race.description,
     categories: categoryNames.length > 0 ? categoryNames : ['Open'],
     format:
       categoryNames.length > 0 ? `${categoryNames.length} categories` : 'TBA',
