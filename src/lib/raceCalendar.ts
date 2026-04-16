@@ -24,7 +24,7 @@ export function mapParticipant(row: ParticipantRow): Participant {
 }
 
 export function mapRaceEntry(
-  row: RaceCalendarWithRelations['race_sub_races'][number]['race_entries'][number],
+  row: RaceCalendarWithRelations['race_sub_races'][number]['race_entries'][number]
 ): RaceEntry {
   return {
     id: row.id,
@@ -39,13 +39,17 @@ export function mapRaceEntry(
     timeText: row.time_text,
     status: row.status,
     notes: row.notes,
-    participant: row.participants ? mapParticipant(row.participants) : undefined,
+    participant: row.participants
+      ? mapParticipant(row.participants)
+      : undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
 }
 
-export function mapRaceSubRace(row: RaceCalendarWithRelations['race_sub_races'][number]): RaceSubRace {
+export function mapRaceSubRace(
+  row: RaceCalendarWithRelations['race_sub_races'][number]
+): RaceSubRace {
   return {
     id: row.id,
     raceCalendarId: row.race_calendar_id,
@@ -136,7 +140,9 @@ export async function fetchRaceCalendars(): Promise<RaceCalendar[]> {
   return rows.map(mapRaceCalendar);
 }
 
-export async function fetchRaceCalendarById(id: string): Promise<RaceCalendar | null> {
+export async function fetchRaceCalendarById(
+  id: string
+): Promise<RaceCalendar | null> {
   const { data, error } = await supabase
     .from('race_calendar')
     .select(raceCalendarSelect)
