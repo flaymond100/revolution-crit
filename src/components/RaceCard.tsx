@@ -11,7 +11,6 @@ type RaceCardProps = {
   categories: string[];
   format: string;
   registrationStatus: string;
-  cover: string;
   featured?: boolean;
 };
 
@@ -25,7 +24,6 @@ export function RaceCard({
   description,
   format,
   registrationStatus,
-  cover,
   featured = false,
 }: RaceCardProps) {
   return (
@@ -35,12 +33,6 @@ export function RaceCard({
         featured ? 'race-card-featured' : 'race-card-default',
       ].join(' ')}
     >
-      <div
-        aria-hidden="true"
-        className="race-cover mb-5"
-        style={{ background: cover }}
-      />
-
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.26em] text-(--accent-secondary)">

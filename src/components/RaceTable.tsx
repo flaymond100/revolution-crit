@@ -94,14 +94,6 @@ export function RaceTable({ races }: RaceTableProps) {
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div
-                        aria-hidden="true"
-                        className="race-table-thumb"
-                        style={{
-                          background:
-                            'linear-gradient(140deg, rgba(124,58,237,0.52), rgba(11,15,20,0.78)), radial-gradient(circle at 82% 16%, rgba(0,212,255,0.36), transparent 38%)',
-                        }}
-                      />
                       <div>
                         <Link
                           className="font-heading text-lg font-semibold text-(--text-primary-dark)"

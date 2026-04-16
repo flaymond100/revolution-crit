@@ -153,7 +153,6 @@ export function RacesPage() {
               key={race.id}
               categories={race.categories}
               city={race.city}
-              cover={race.cover}
               date={race.date}
               description={race.description}
               featured={index === 0}
@@ -441,13 +440,9 @@ export function GalleryRacePage() {
 export function AboutPage() {
   return (
     <PlaceholderPage
-      description="The about page is positioned for series story, mission, organizers, and the brand tone that distinguishes urban criterium racing from generic sports sites."
+      description="Short, spectacular bike races through the urban canyons of German city centres. Food trucks, commentary, music, racing action... the spectators are in for a treat. The riders will get to show off their cornering skills and sprinting abilities in front of a live audience."
       eyebrow="About"
-      highlights={[
-        'Ideal for mission, race philosophy, and event model explainers.',
-        'Can support organizer profiles and season history modules.',
-        'Matches the premium tone established by the shared shell.',
-      ]}
+      highlights={[]}
       title="About the series"
     />
   );
