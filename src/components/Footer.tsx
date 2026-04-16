@@ -10,7 +10,6 @@ const secondaryLinks: { label: string; to: string }[] = [
 const legalLinks = [
   { label: 'Imprint', to: '/imprint' },
   { label: 'Privacy', to: '/privacy' },
-  { label: 'Terms', to: '/terms' },
 ];
 
 export function Footer() {
@@ -28,9 +27,8 @@ export function Footer() {
                 riders.
               </h2>
               <p className="mt-3 max-w-xl text-sm text-[color:var(--text-secondary-dark)] sm:text-base">
-                Critirium races across Sachsen for all levels of racers, from
-                first-timers to seasoned pros, with a focus on community, fun
-                and development.
+                Critirium races for all levels of racers, from first-timers to
+                seasoned pros, with a focus on community, fun and development.
               </p>
             </div>
           </div>

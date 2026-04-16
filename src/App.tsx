@@ -20,7 +20,6 @@ import {
   ResultsPage,
   ResultsRacePage,
   ResultsSeasonPage,
-  TermsPage,
   TrainingCampPage,
 } from './pages/RoutePages';
 
@@ -65,7 +64,6 @@ function App() {
           <Route element={<FaqPage />} path="/faq" />
           <Route element={<ImprintPage />} path="/imprint" />
           <Route element={<PrivacyPage />} path="/privacy" />
-          <Route element={<TermsPage />} path="/terms" />
           <Route element={<Navigate replace to="/" />} path="*" />
         </Route>
       </Routes>
