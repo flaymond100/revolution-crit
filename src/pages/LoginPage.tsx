@@ -8,7 +8,8 @@ function readRedirectPath(state: unknown): string {
     typeof state === 'object' &&
     'from' in state &&
     (state as { from?: { pathname?: unknown } }).from &&
-    typeof (state as { from: { pathname?: unknown } }).from.pathname === 'string'
+    typeof (state as { from: { pathname?: unknown } }).from.pathname ===
+      'string'
   ) {
     return (state as { from: { pathname: string } }).from.pathname;
   }
@@ -103,7 +104,7 @@ export function LoginPage() {
           Login
         </h1>
         <p className="mt-4 text-base leading-7 text-(--text-secondary-dark)">
-          Sign in with your Supabase email and password.
+          Sign in with your email and password.
         </p>
 
         {isCheckingSession ? (
@@ -155,7 +156,11 @@ export function LoginPage() {
               />
             </label>
 
-            <button className="cta-button w-full justify-center" disabled={isSubmitting} type="submit">
+            <button
+              className="cta-button w-full justify-center"
+              disabled={isSubmitting}
+              type="submit"
+            >
               {isSubmitting ? 'Signing in...' : 'Sign in'}
             </button>
           </form>

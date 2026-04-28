@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import type { Session } from '@supabase/supabase-js';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import logoImg from '../../public/assets/logo.png';
+import { supabase } from '../lib/supabase';
 
 const primaryLinks = [
   { label: 'Home', to: '/' },
   { label: 'Calendar', to: '/calendar' },
   { label: 'Results', to: '/results' },
-  { label: 'Login', to: '/login' },
   // { label: 'Categories', to: '/categories' },
   // { label: 'Gallery', to: '/gallery' },
   { label: 'About', to: '/about' },
@@ -70,9 +71,12 @@ function ThemeIcon({ isLightTheme }: { isLightTheme: boolean }) {
 }
 
 export function Header() {
+  const navigate = useNavigate();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -82,6 +86,44 @@ export function Header() {
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSession() {
+      const { data } = await supabase.auth.getSession();
+
+      if (!isMounted) {
+        return;
+      }
+
+      setSession(data.session ?? null);
+    }
+
+    loadSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession ?? null);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  async function handleSignOut() {
+    if (isSigningOut) {
+      return;
+    }
+
+    setIsSigningOut(true);
+    await supabase.auth.signOut();
+    setIsSigningOut(false);
+    navigate('/login');
+  }
 
   const isLightTheme = theme === 'light';
 
@@ -131,6 +173,24 @@ export function Header() {
           {/* <Link className="cta-button" to="/calendar">
             Register Now
           </Link> */}
+
+          {session ? (
+            <button
+              className="inline-flex items-center justify-center rounded-full border border-[color:var(--border-dark)] bg-[color:var(--surface-soft)] px-2.5 py-1 text-[11px] font-semibold tracking-[0.08em] text-[color:var(--text-primary-dark)] uppercase transition hover:border-[color:var(--accent-secondary)] hover:text-[color:var(--accent-secondary)]"
+              disabled={isSigningOut}
+              onClick={handleSignOut}
+              type="button"
+            >
+              {isSigningOut ? 'Signing out...' : 'Logout'}
+            </button>
+          ) : (
+            <Link
+              className="inline-flex items-center justify-center rounded-full border border-[color:var(--accent-cta)] bg-[color:var(--accent-cta)] px-2.5 py-1 text-[11px] font-semibold tracking-[0.08em] text-[#fff7f3] uppercase transition hover:opacity-90"
+              to="/login"
+            >
+              Login
+            </Link>
+          )}
 
           <button
             aria-label={
@@ -214,6 +274,24 @@ export function Header() {
               aria-label="Mobile secondary"
               className="grid gap-2 border-t border-[color:var(--border-dark)] pt-5"
             >
+              {session ? (
+                <button
+                  className="inline-flex items-center justify-center rounded-full border border-[color:var(--border-dark)] bg-[color:var(--surface-soft)] px-2.5 py-1 text-[11px] font-semibold tracking-[0.08em] text-[color:var(--text-primary-dark)] uppercase transition hover:border-[color:var(--accent-secondary)] hover:text-[color:var(--accent-secondary)]"
+                  disabled={isSigningOut}
+                  onClick={handleSignOut}
+                  type="button"
+                >
+                  {isSigningOut ? 'Signing out...' : 'Logout'}
+                </button>
+              ) : (
+                <Link
+                  className="inline-flex items-center justify-center rounded-full border border-[color:var(--accent-cta)] bg-[color:var(--accent-cta)] px-2.5 py-1 text-[11px] font-semibold tracking-[0.08em] text-[#fff7f3] uppercase transition hover:opacity-90"
+                  to="/login"
+                >
+                  Login
+                </Link>
+              )}
+
               {/* {utilityLinks.map(link => (
                 <NavLink
                   key={link.to}
