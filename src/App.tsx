@@ -4,7 +4,9 @@ import './App.css';
 import { AppLayout } from './components/AppLayout';
 import { RequireAuth } from './components/RequireAuth';
 import { HomePage } from './pages/HomePage';
+import { EditRacePage } from './pages/EditRacePage';
 import { LoginPage } from './pages/LoginPage';
+import { NewRacePage } from './pages/NewRacePage';
 import { RaceRegistrationPage } from './pages/RaceRegistrationPage';
 import {
   AboutPage,
@@ -49,6 +51,22 @@ function App() {
               </RequireAuth>
             }
             path="/calendar/:slug/register"
+          />
+          <Route
+            element={
+              <RequireAuth>
+                <NewRacePage />
+              </RequireAuth>
+            }
+            path="/races/new"
+          />
+          <Route
+            element={
+              <RequireAuth>
+                <EditRacePage />
+              </RequireAuth>
+            }
+            path="/races/:raceId/edit"
           />
           <Route element={<LoginPage />} path="/login" />
           <Route element={<ResultsPage />} path="/results" />

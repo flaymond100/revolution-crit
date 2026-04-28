@@ -175,14 +175,22 @@ export function Header() {
           </Link> */}
 
           {session ? (
-            <button
-              className="inline-flex items-center justify-center rounded-full border border-[color:var(--border-dark)] bg-[color:var(--surface-soft)] px-2.5 py-1 text-[11px] font-semibold tracking-[0.08em] text-[color:var(--text-primary-dark)] uppercase transition hover:border-[color:var(--accent-secondary)] hover:text-[color:var(--accent-secondary)]"
-              disabled={isSigningOut}
-              onClick={handleSignOut}
-              type="button"
-            >
-              {isSigningOut ? 'Signing out...' : 'Logout'}
-            </button>
+            <>
+              <Link
+                className="inline-flex items-center justify-center rounded-full border border-[color:var(--accent-secondary)] bg-[color:var(--nav-active-bg)] px-2.5 py-1 text-[11px] font-semibold tracking-[0.08em] text-[color:var(--text-primary-dark)] uppercase transition hover:opacity-90"
+                to="/races/new"
+              >
+                New Race
+              </Link>
+              <button
+                className="inline-flex items-center justify-center rounded-full border border-[color:var(--border-dark)] bg-[color:var(--surface-soft)] px-2.5 py-1 text-[11px] font-semibold tracking-[0.08em] text-[color:var(--text-primary-dark)] uppercase transition hover:border-[color:var(--accent-secondary)] hover:text-[color:var(--accent-secondary)]"
+                disabled={isSigningOut}
+                onClick={handleSignOut}
+                type="button"
+              >
+                {isSigningOut ? 'Signing out...' : 'Logout'}
+              </button>
+            </>
           ) : (
             <Link
               className="inline-flex items-center justify-center rounded-full border border-[color:var(--accent-cta)] bg-[color:var(--accent-cta)] px-2.5 py-1 text-[11px] font-semibold tracking-[0.08em] text-[#fff7f3] uppercase transition hover:opacity-90"
@@ -275,14 +283,22 @@ export function Header() {
               className="grid gap-2 border-t border-[color:var(--border-dark)] pt-5"
             >
               {session ? (
-                <button
-                  className="inline-flex items-center justify-center rounded-full border border-[color:var(--border-dark)] bg-[color:var(--surface-soft)] px-2.5 py-1 text-[11px] font-semibold tracking-[0.08em] text-[color:var(--text-primary-dark)] uppercase transition hover:border-[color:var(--accent-secondary)] hover:text-[color:var(--accent-secondary)]"
-                  disabled={isSigningOut}
-                  onClick={handleSignOut}
-                  type="button"
-                >
-                  {isSigningOut ? 'Signing out...' : 'Logout'}
-                </button>
+                <>
+                  <Link
+                    className="inline-flex items-center justify-center rounded-full border border-[color:var(--accent-secondary)] bg-[color:var(--nav-active-bg)] px-2.5 py-1 text-[11px] font-semibold tracking-[0.08em] text-[color:var(--text-primary-dark)] uppercase transition hover:opacity-90"
+                    to="/races/new"
+                  >
+                    New Race
+                  </Link>
+                  <button
+                    className="inline-flex items-center justify-center rounded-full border border-[color:var(--border-dark)] bg-[color:var(--surface-soft)] px-2.5 py-1 text-[11px] font-semibold tracking-[0.08em] text-[color:var(--text-primary-dark)] uppercase transition hover:border-[color:var(--accent-secondary)] hover:text-[color:var(--accent-secondary)]"
+                    disabled={isSigningOut}
+                    onClick={handleSignOut}
+                    type="button"
+                  >
+                    {isSigningOut ? 'Signing out...' : 'Logout'}
+                  </button>
+                </>
               ) : (
                 <Link
                   className="inline-flex items-center justify-center rounded-full border border-[color:var(--accent-cta)] bg-[color:var(--accent-cta)] px-2.5 py-1 text-[11px] font-semibold tracking-[0.08em] text-[#fff7f3] uppercase transition hover:opacity-90"

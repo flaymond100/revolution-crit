@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import type { Session } from '@supabase/supabase-js';
 import ReactMarkdown from 'react-markdown';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { RaceCard } from '../components/RaceCard';
 import { RaceTable } from '../components/RaceTable';
 import { fetchRaceCalendars } from '../lib/raceCalendar';
 import { toRaceItems } from '../lib/racePresentation';
+import { supabase } from '../lib/supabase';
 import type { RaceCalendar } from '../types';
 
 function sortRacesByDate(races: RaceCalendar[]): RaceCalendar[] {
@@ -167,7 +169,11 @@ export function RacesPage() {
 }
 
 export function RaceDetailPage() {
+  const navigate = useNavigate();
   const { slug } = useParams();
+  const [session, setSession] = useState<Session | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['race-calendar'],
@@ -234,6 +240,93 @@ export function RaceDetailPage() {
       .map(part => part[0]!.toUpperCase() + part.slice(1).toLowerCase())
       .join(' ');
   }, [race?.type]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSession() {
+      const { data } = await supabase.auth.getSession();
+
+      if (!isMounted) {
+        return;
+      }
+
+      setSession(data.session ?? null);
+    }
+
+    loadSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession ?? null);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  async function handleDeleteRace() {
+    if (!race || isDeleting) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Delete this race? This will also remove related categories and entries.'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeleteError(null);
+    setIsDeleting(true);
+
+    try {
+      const subRaceIds = (race.subRaces ?? []).map(subRace => subRace.id);
+
+      if (subRaceIds.length > 0) {
+        const { error: entryDeleteError } = await supabase
+          .from('race_entries')
+          .delete()
+          .in('sub_race_id', subRaceIds);
+
+        if (entryDeleteError) {
+          throw entryDeleteError;
+        }
+
+        const { error: subRaceDeleteError } = await supabase
+          .from('race_sub_races')
+          .delete()
+          .eq('race_calendar_id', race.id);
+
+        if (subRaceDeleteError) {
+          throw subRaceDeleteError;
+        }
+      }
+
+      const { error: raceDeleteError } = await supabase
+        .from('race_calendar')
+        .delete()
+        .eq('id', race.id);
+
+      if (raceDeleteError) {
+        throw raceDeleteError;
+      }
+
+      navigate('/calendar');
+    } catch (error) {
+      if (error instanceof Error) {
+        setDeleteError(error.message);
+      } else {
+        setDeleteError('Could not delete race.');
+      }
+    } finally {
+      setIsDeleting(false);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -368,7 +461,30 @@ export function RaceDetailPage() {
               External results
             </a>
           ) : null}
+          {session ? (
+            <Link
+              className="ghost-button w-full justify-center sm:w-auto"
+              to={`/races/${race.id}/edit`}
+            >
+              Modify race
+            </Link>
+          ) : null}
+          {session ? (
+            <button
+              className="ghost-button w-full justify-center border-rose-400/40 text-rose-200 hover:bg-rose-500/12 sm:w-auto"
+              disabled={isDeleting}
+              onClick={handleDeleteRace}
+              type="button"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete race'}
+            </button>
+          ) : null}
         </div>
+        {deleteError ? (
+          <p className="mt-4 rounded-2xl border border-rose-400/35 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+            {deleteError}
+          </p>
+        ) : null}
       </div>
     </section>
   );
