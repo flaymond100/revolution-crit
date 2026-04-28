@@ -6,6 +6,7 @@ const primaryLinks = [
   { label: 'Home', to: '/' },
   { label: 'Calendar', to: '/calendar' },
   { label: 'Results', to: '/results' },
+  { label: 'Login', to: '/login' },
   // { label: 'Categories', to: '/categories' },
   // { label: 'Gallery', to: '/gallery' },
   { label: 'About', to: '/about' },

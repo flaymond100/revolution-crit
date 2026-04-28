@@ -2,7 +2,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
 import { AppLayout } from './components/AppLayout';
+import { RequireAuth } from './components/RequireAuth';
 import { HomePage } from './pages/HomePage';
+import { LoginPage } from './pages/LoginPage';
 import { RaceRegistrationPage } from './pages/RaceRegistrationPage';
 import {
   AboutPage,
@@ -41,9 +43,14 @@ function App() {
           <Route element={<RacesPage />} path="/calendar" />
           <Route element={<RaceDetailPage />} path="/calendar/:slug" />
           <Route
-            element={<RaceRegistrationPage />}
+            element={
+              <RequireAuth>
+                <RaceRegistrationPage />
+              </RequireAuth>
+            }
             path="/calendar/:slug/register"
           />
+          <Route element={<LoginPage />} path="/login" />
           <Route element={<ResultsPage />} path="/results" />
           <Route element={<ResultsSeasonPage />} path="/results/:season" />
           <Route
