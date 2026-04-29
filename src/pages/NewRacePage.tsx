@@ -1,11 +1,12 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { fetchRaceCategories } from '../lib/raceCategories';
 import { supabase } from '../lib/supabase';
 
 type RaceCategoryInput = {
   id: string;
-  name: string;
+  raceCategoryId: string;
 };
 
 type NewRaceFormState = {
@@ -47,7 +48,8 @@ function validateUrl(value: string): boolean {
 
 function validateForm(
   formState: NewRaceFormState,
-  categories: RaceCategoryInput[]
+  categories: RaceCategoryInput[],
+  raceCategoryIds: Set<string>
 ): NewRaceFormErrors {
   const errors: NewRaceFormErrors = {};
 
@@ -77,8 +79,9 @@ function validateForm(
   }
 
   const validCategoryCount = categories.filter(category =>
-    category.name.trim()
+    raceCategoryIds.has(category.raceCategoryId)
   ).length;
+
   if (validCategoryCount === 0) {
     errors.categories = 'Add at least one category.';
   }
@@ -103,21 +106,35 @@ export function NewRacePage() {
   const [formState, setFormState] =
     useState<NewRaceFormState>(initialFormState);
   const [categories, setCategories] = useState<RaceCategoryInput[]>([
-    { id: crypto.randomUUID(), name: '' },
+    { id: crypto.randomUUID(), raceCategoryId: '' },
   ]);
   const [errors, setErrors] = useState<NewRaceFormErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const {
+    data: raceCategoryOptions = [],
+    isLoading: isRaceCategoriesLoading,
+    isError: isRaceCategoriesError,
+  } = useQuery({
+    queryKey: ['race-categories'],
+    queryFn: fetchRaceCategories,
+  });
+
+  const raceCategoryIds = useMemo(
+    () => new Set(raceCategoryOptions.map(option => option.id)),
+    [raceCategoryOptions]
+  );
+
   const cleanedCategories = useMemo(
     () =>
       categories
-        .map(category => category.name.trim())
-        .filter(Boolean)
-        .map((name, index) => ({
-          name,
+        .map(category => category.raceCategoryId)
+        .filter(categoryId => raceCategoryIds.has(categoryId))
+        .map((categoryId, index) => ({
+          name: categoryId,
           sort_order: index + 1,
         })),
-    [categories]
+    [categories, raceCategoryIds]
   );
 
   const createRaceMutation = useMutation({
@@ -185,7 +202,7 @@ export function NewRacePage() {
   function updateCategory(id: string, value: string) {
     setCategories(current =>
       current.map(category =>
-        category.id === id ? { ...category, name: value } : category
+        category.id === id ? { ...category, raceCategoryId: value } : category
       )
     );
 
@@ -198,7 +215,7 @@ export function NewRacePage() {
   function addCategory() {
     setCategories(current => [
       ...current,
-      { id: crypto.randomUUID(), name: '' },
+      { id: crypto.randomUUID(), raceCategoryId: '' },
     ]);
   }
 
@@ -216,7 +233,7 @@ export function NewRacePage() {
     event.preventDefault();
     setSubmitError(null);
 
-    const nextErrors = validateForm(formState, categories);
+    const nextErrors = validateForm(formState, categories, raceCategoryIds);
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0) {
@@ -377,15 +394,25 @@ export function NewRacePage() {
                 <span className="w-8 shrink-0 text-sm text-(--text-secondary-dark)">
                   {index + 1}.
                 </span>
-                <input
+                <select
                   className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+                  disabled={isRaceCategoriesLoading || isRaceCategoriesError}
                   onChange={event =>
                     updateCategory(category.id, event.target.value)
                   }
-                  placeholder="Category name (e.g., Elite, Women, Junior)"
-                  type="text"
-                  value={category.name}
-                />
+                  value={category.raceCategoryId}
+                >
+                  <option value="">
+                    {isRaceCategoriesLoading
+                      ? 'Loading categories...'
+                      : 'Select category'}
+                  </option>
+                  {raceCategoryOptions.map(option => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
                 <button
                   className="ghost-button px-3 py-2"
                   disabled={categories.length === 1}
@@ -400,6 +427,9 @@ export function NewRacePage() {
 
           {errors.categories ? (
             <p className="text-xs text-rose-300">{errors.categories}</p>
+          ) : null}
+          {isRaceCategoriesError ? (
+            <p className="text-xs text-rose-300">Could not load categories.</p>
           ) : null}
         </section>
 

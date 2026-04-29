@@ -5,6 +5,10 @@ import ReactMarkdown from 'react-markdown';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { RaceCard } from '../components/RaceCard';
 import { RaceTable } from '../components/RaceTable';
+import {
+  createRaceCategoryLabelMap,
+  fetchRaceCategories,
+} from '../lib/raceCategories';
 import { fetchRaceCalendars } from '../lib/raceCalendar';
 import { toRaceItems } from '../lib/racePresentation';
 import { supabase } from '../lib/supabase';
@@ -58,7 +62,7 @@ function PlaceholderPage({
             {highlights.map(highlight => (
               <div
                 key={highlight}
-                className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4 text-sm leading-6 text-(--text-secondary-dark)"
+                className="rounded-3xl border border-white/10 bg-white/5 px-4 py-4 text-sm leading-6 text-(--text-secondary-dark)"
               >
                 {highlight}
               </div>
@@ -76,8 +80,13 @@ export function RacesPage() {
     queryFn: fetchRaceCalendars,
   });
 
+  const { data: raceCategories = [] } = useQuery({
+    queryKey: ['race-categories'],
+    queryFn: fetchRaceCategories,
+  });
+
   const tableRaces = sortRacesByDate(data ?? []);
-  const races = toRaceItems(data ?? []);
+  const races = toRaceItems(data ?? [], createRaceCategoryLabelMap(raceCategories));
 
   if (isLoading) {
     return (
@@ -99,7 +108,7 @@ export function RacesPage() {
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={index}
-              className="surface-panel h-[23rem] animate-pulse rounded-[1.75rem] bg-white/5"
+              className="surface-panel h-92 animate-pulse rounded-[1.75rem] bg-white/5"
             />
           ))}
         </div>

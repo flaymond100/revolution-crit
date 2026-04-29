@@ -1,13 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { fetchRaceCategories } from '../lib/raceCategories';
 import { fetchRaceCalendarById } from '../lib/raceCalendar';
 import { supabase } from '../lib/supabase';
 
 type RaceCategoryInput = {
   clientId: string;
   id?: string;
-  name: string;
+  raceCategoryId: string;
 };
 
 type EditRaceFormState = {
@@ -49,7 +50,8 @@ function validateUrl(value: string): boolean {
 
 function validateForm(
   formState: EditRaceFormState,
-  categories: RaceCategoryInput[]
+  categories: RaceCategoryInput[],
+  raceCategoryIds: Set<string>
 ): EditRaceFormErrors {
   const errors: EditRaceFormErrors = {};
 
@@ -79,7 +81,7 @@ function validateForm(
   }
 
   const validCategoryCount = categories.filter(category =>
-    category.name.trim()
+    raceCategoryIds.has(category.raceCategoryId)
   ).length;
 
   if (validCategoryCount === 0) {
@@ -121,6 +123,15 @@ export function EditRacePage() {
     enabled: Boolean(raceId),
   });
 
+  const {
+    data: raceCategoryOptions = [],
+    isLoading: isRaceCategoriesLoading,
+    isError: isRaceCategoriesError,
+  } = useQuery({
+    queryKey: ['race-categories'],
+    queryFn: fetchRaceCategories,
+  });
+
   useEffect(() => {
     if (!race) {
       return;
@@ -145,27 +156,49 @@ export function EditRacePage() {
     const initialCategories = sortedCategories.map(category => ({
       clientId: crypto.randomUUID(),
       id: category.id,
-      name: category.name,
+      raceCategoryId: category.name,
     }));
 
     setCategories(
       initialCategories.length > 0
         ? initialCategories
-        : [{ clientId: crypto.randomUUID(), name: '' }]
+        : [{ clientId: crypto.randomUUID(), raceCategoryId: '' }]
     );
     setOriginalCategoryIds(sortedCategories.map(category => category.id));
   }, [race]);
+
+  const raceCategoryIds = useMemo(
+    () => new Set(raceCategoryOptions.map(option => option.id)),
+    [raceCategoryOptions]
+  );
 
   const normalizedCategories = useMemo(
     () =>
       categories
         .map(category => ({
           ...category,
-          name: category.name.trim(),
+          raceCategoryId: category.raceCategoryId,
         }))
-        .filter(category => category.name),
-    [categories]
+        .filter(category => raceCategoryIds.has(category.raceCategoryId)),
+    [categories, raceCategoryIds]
   );
+
+  const raceCategoryOptionsWithCurrent = useMemo(() => {
+    const missingCategoryIds = categories
+      .map(category => category.raceCategoryId)
+      .filter(categoryId => categoryId && !raceCategoryIds.has(categoryId));
+
+    if (missingCategoryIds.length === 0) {
+      return raceCategoryOptions;
+    }
+
+    const fallbackOptions = missingCategoryIds.map(categoryId => ({
+      id: categoryId,
+      label: `Current (${categoryId})`,
+    }));
+
+    return [...raceCategoryOptions, ...fallbackOptions];
+  }, [categories, raceCategoryIds, raceCategoryOptions]);
 
   const updateRaceMutation = useMutation({
     mutationFn: async () => {
@@ -233,7 +266,7 @@ export function EditRacePage() {
           const { error: updateCategoryError } = await supabase
             .from('race_sub_races')
             .update({
-              name: category.name,
+              name: category.raceCategoryId,
               sort_order: sortOrder,
             })
             .eq('id', category.id);
@@ -246,7 +279,7 @@ export function EditRacePage() {
             .from('race_sub_races')
             .insert({
               race_calendar_id: raceId,
-              name: category.name,
+              name: category.raceCategoryId,
               sort_order: sortOrder,
             });
 
@@ -281,7 +314,9 @@ export function EditRacePage() {
   function updateCategory(clientId: string, value: string) {
     setCategories(current =>
       current.map(category =>
-        category.clientId === clientId ? { ...category, name: value } : category
+        category.clientId === clientId
+          ? { ...category, raceCategoryId: value }
+          : category
       )
     );
 
@@ -294,7 +329,7 @@ export function EditRacePage() {
   function addCategory() {
     setCategories(current => [
       ...current,
-      { clientId: crypto.randomUUID(), name: '' },
+      { clientId: crypto.randomUUID(), raceCategoryId: '' },
     ]);
   }
 
@@ -312,7 +347,7 @@ export function EditRacePage() {
     event.preventDefault();
     setSubmitError(null);
 
-    const nextErrors = validateForm(formState, categories);
+    const nextErrors = validateForm(formState, categories, raceCategoryIds);
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0) {
@@ -500,15 +535,25 @@ export function EditRacePage() {
                 <span className="w-8 shrink-0 text-sm text-(--text-secondary-dark)">
                   {index + 1}.
                 </span>
-                <input
+                <select
                   className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+                  disabled={isRaceCategoriesLoading || isRaceCategoriesError}
                   onChange={event =>
                     updateCategory(category.clientId, event.target.value)
                   }
-                  placeholder="Category name"
-                  type="text"
-                  value={category.name}
-                />
+                  value={category.raceCategoryId}
+                >
+                  <option value="">
+                    {isRaceCategoriesLoading
+                      ? 'Loading categories...'
+                      : 'Select category'}
+                  </option>
+                  {raceCategoryOptionsWithCurrent.map(option => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
                 <button
                   className="ghost-button px-3 py-2"
                   disabled={categories.length === 1}
@@ -523,6 +568,9 @@ export function EditRacePage() {
 
           {errors.categories ? (
             <p className="text-xs text-rose-300">{errors.categories}</p>
+          ) : null}
+          {isRaceCategoriesError ? (
+            <p className="text-xs text-rose-300">Could not load categories.</p>
           ) : null}
         </section>
 

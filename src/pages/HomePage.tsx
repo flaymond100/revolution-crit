@@ -2,6 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { RaceCard } from '../components/RaceCard';
 import { SectionIntro } from '../components/SectionIntro';
+import {
+  createRaceCategoryLabelMap,
+  fetchRaceCategories,
+} from '../lib/raceCategories';
 import { fetchRaceCalendars } from '../lib/raceCalendar';
 import { toRaceItems } from '../lib/racePresentation';
 import { RaceTable } from '../components/RaceTable';
@@ -16,7 +20,15 @@ export function HomePage() {
     queryFn: fetchRaceCalendars,
   });
 
-  const races = toRaceItems(raceCalendar ?? []);
+  const { data: raceCategories = [] } = useQuery({
+    queryKey: ['race-categories'],
+    queryFn: fetchRaceCategories,
+  });
+
+  const races = toRaceItems(
+    raceCalendar ?? [],
+    createRaceCategoryLabelMap(raceCategories)
+  );
 
   const promotedRaceDate = races[0]
     ? new Intl.DateTimeFormat('en-GB', {
@@ -28,13 +40,13 @@ export function HomePage() {
 
   return (
     <div className="page-shell">
-      <section className="hero-grid home-hero-section overflow-hidden rounded-[2rem] border border-[color:var(--border-dark)] px-6 py-8 sm:px-10 sm:py-12 lg:px-14 lg:py-16">
+      <section className="hero-grid home-hero-section overflow-hidden rounded-4xl border border-(--border-dark) px-6 py-8 sm:px-10 sm:py-12 lg:px-14 lg:py-16">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:gap-12">
           <div className="relative">
             <h1 className="mt-5 max-w-3xl font-heading text-4xl font-semibold leading-[1.02] text-(--text-primary-dark) sm:text-5xl lg:text-7xl">
               We want to
             </h1>
-            <span className="mt-5 max-w-3xl font-heading text-4xl font-semibold leading-[1] text-(--accent-secondary) sm:text-5xl lg:text-7xl">
+            <span className="mt-5 max-w-3xl font-heading text-4xl font-semibold leading-none text-(--accent-secondary) sm:text-5xl lg:text-7xl">
               revolutionise
             </span>
             <h1 className="mt-5 max-w-3xl font-heading text-4xl font-semibold leading-[1.02] text-(--text-primary-dark) sm:text-5xl lg:text-7xl">
@@ -82,7 +94,7 @@ export function HomePage() {
           </div>
 
           <div className="grid gap-4 self-end">
-            <div className="hero-highlight-card rounded-[1.75rem] border border-[color:var(--border-dark)] p-5 sm:p-6">
+            <div className="hero-highlight-card rounded-[1.75rem] border border-(--border-dark) p-5 sm:p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.26em] text-(--accent-secondary)">
                 Upcoming Highlight
               </p>

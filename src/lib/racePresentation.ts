@@ -1,4 +1,5 @@
 import type { RaceItem, RaceRegistrationStatus } from '../data/races';
+import { resolveRaceCategoryLabel } from './raceCategories';
 import type { RaceCalendar, RaceSubRace, RaceType } from '../types';
 
 const raceCovers = [
@@ -52,10 +53,17 @@ export function registrationStatus(race: RaceCalendar): RaceRegistrationStatus {
   return 'Registration Open';
 }
 
-export function toRaceItem(race: RaceCalendar, index: number): RaceItem {
+export function toRaceItem(
+  race: RaceCalendar,
+  index: number,
+  categoryLabels: Map<string, string> = new Map()
+): RaceItem {
   const city = parseCity(race.location);
   const typeLabel = formatRaceType(race.type);
-  const categoryNames = race.subRaces?.map(subRace => subRace.name) ?? [];
+  const categoryNames =
+    race.subRaces?.map(subRace =>
+      resolveRaceCategoryLabel(subRace.name, categoryLabels)
+    ) ?? [];
   const raceTitle = race.name?.trim() ? race.name : `${city} ${typeLabel}`;
 
   return {
@@ -75,8 +83,11 @@ export function toRaceItem(race: RaceCalendar, index: number): RaceItem {
   };
 }
 
-export function toRaceItems(races: RaceCalendar[]): RaceItem[] {
-  return races.map(toRaceItem);
+export function toRaceItems(
+  races: RaceCalendar[],
+  categoryLabels: Map<string, string> = new Map()
+): RaceItem[] {
+  return races.map((race, index) => toRaceItem(race, index, categoryLabels));
 }
 
 export function toFallbackRaceCalendars(items: RaceItem[]): RaceCalendar[] {

@@ -1,6 +1,11 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
+import {
+  createRaceCategoryLabelMap,
+  fetchRaceCategories,
+  resolveRaceCategoryLabel,
+} from '../lib/raceCategories';
 import { fetchRaceCalendarById } from '../lib/raceCalendar';
 import { createPaymentCheckout } from '../lib/paymentApi';
 
@@ -105,6 +110,11 @@ export function RaceRegistrationPage() {
     enabled: Boolean(slug),
   });
 
+  const { data: raceCategories = [] } = useQuery({
+    queryKey: ['race-categories'],
+    queryFn: fetchRaceCategories,
+  });
+
   const sortedSubRaces = useMemo(() => {
     if (!race?.subRaces) {
       return [];
@@ -142,6 +152,11 @@ export function RaceRegistrationPage() {
     mutationFn: createPaymentCheckout,
   });
 
+  const raceCategoryLabels = useMemo(
+    () => createRaceCategoryLabelMap(raceCategories),
+    [raceCategories]
+  );
+
   const { refetch: runTest } = useQuery({
     queryKey: ['test'],
     queryFn: () => fetch(`http://localhost:3003/test`).then(res => res.json()),
@@ -156,8 +171,16 @@ export function RaceRegistrationPage() {
       subRace => subRace.id === formState.startingClass
     );
 
-    return selectedSubRace?.name.trim().toLowerCase() === 'elite';
-  }, [formState.startingClass, sortedSubRaces]);
+    if (!selectedSubRace) {
+      return false;
+    }
+
+    return (
+      resolveRaceCategoryLabel(selectedSubRace.name, raceCategoryLabels)
+        .trim()
+        .toLowerCase() === 'elite'
+    );
+  }, [formState.startingClass, raceCategoryLabels, sortedSubRaces]);
 
   useEffect(() => {
     if (isEliteClassSelected) {
@@ -275,7 +298,7 @@ export function RaceRegistrationPage() {
             {Array.from({ length: 8 }).map((_, index) => (
               <div
                 key={index}
-                className="h-20 animate-pulse rounded-[1.5rem] bg-white/6"
+                className="h-20 animate-pulse rounded-3xl bg-white/6"
               />
             ))}
           </div>
@@ -368,7 +391,7 @@ export function RaceRegistrationPage() {
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
               <span>First name *</span>
               <input
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-[color:var(--accent-secondary)]"
+                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
                 name="firstName"
                 onChange={event =>
                   handleFieldChange('firstName', event.target.value)
@@ -378,7 +401,7 @@ export function RaceRegistrationPage() {
                 value={formState.firstName}
               />
               {errors.firstName ? (
-                <span className="text-sm text-[color:var(--accent-cta)]">
+                <span className="text-sm text-(--accent-cta)">
                   {errors.firstName}
                 </span>
               ) : null}
@@ -387,7 +410,7 @@ export function RaceRegistrationPage() {
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
               <span>Last name *</span>
               <input
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-[color:var(--accent-secondary)]"
+                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
                 name="lastName"
                 onChange={event =>
                   handleFieldChange('lastName', event.target.value)
@@ -397,7 +420,7 @@ export function RaceRegistrationPage() {
                 value={formState.lastName}
               />
               {errors.lastName ? (
-                <span className="text-sm text-[color:var(--accent-cta)]">
+                <span className="text-sm text-(--accent-cta)">
                   {errors.lastName}
                 </span>
               ) : null}
@@ -406,7 +429,7 @@ export function RaceRegistrationPage() {
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
               <span>Birth date *</span>
               <input
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-[color:var(--accent-secondary)]"
+                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
                 name="birthDate"
                 onChange={event =>
                   handleFieldChange('birthDate', event.target.value)
@@ -415,7 +438,7 @@ export function RaceRegistrationPage() {
                 value={formState.birthDate}
               />
               {errors.birthDate ? (
-                <span className="text-sm text-[color:var(--accent-cta)]">
+                <span className="text-sm text-(--accent-cta)">
                   {errors.birthDate}
                 </span>
               ) : null}
@@ -424,7 +447,7 @@ export function RaceRegistrationPage() {
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
               <span>Gender *</span>
               <select
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-[color:var(--accent-secondary)]"
+                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
                 name="gender"
                 onChange={event =>
                   handleFieldChange('gender', event.target.value)
@@ -439,7 +462,7 @@ export function RaceRegistrationPage() {
                 ))}
               </select>
               {errors.gender ? (
-                <span className="text-sm text-[color:var(--accent-cta)]">
+                <span className="text-sm text-(--accent-cta)">
                   {errors.gender}
                 </span>
               ) : null}
@@ -448,7 +471,7 @@ export function RaceRegistrationPage() {
             <label className="grid gap-2 text-sm text-(--text-secondary-dark) md:col-span-2">
               <span>Club / Team</span>
               <input
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-[color:var(--accent-secondary)]"
+                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
                 name="clubTeam"
                 onChange={event =>
                   handleFieldChange('clubTeam', event.target.value)
@@ -462,7 +485,7 @@ export function RaceRegistrationPage() {
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
               <span>Nation *</span>
               <input
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-[color:var(--accent-secondary)]"
+                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
                 name="nation"
                 onChange={event =>
                   handleFieldChange('nation', event.target.value)
@@ -472,7 +495,7 @@ export function RaceRegistrationPage() {
                 value={formState.nation}
               />
               {errors.nation ? (
-                <span className="text-sm text-[color:var(--accent-cta)]">
+                <span className="text-sm text-(--accent-cta)">
                   {errors.nation}
                 </span>
               ) : null}
@@ -481,7 +504,7 @@ export function RaceRegistrationPage() {
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
               <span>Starting class *</span>
               <select
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-[color:var(--accent-secondary)] disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary) disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={sortedSubRaces.length === 0}
                 name="startingClass"
                 onChange={event =>
@@ -494,12 +517,12 @@ export function RaceRegistrationPage() {
                 ) : null}
                 {sortedSubRaces.map(subRace => (
                   <option key={subRace.id} value={subRace.id}>
-                    {subRace.name}
+                    {resolveRaceCategoryLabel(subRace.name, raceCategoryLabels)}
                   </option>
                 ))}
               </select>
               {errors.startingClass ? (
-                <span className="text-sm text-[color:var(--accent-cta)]">
+                <span className="text-sm text-(--accent-cta)">
                   {errors.startingClass}
                 </span>
               ) : null}
@@ -509,7 +532,7 @@ export function RaceRegistrationPage() {
               <label className="grid gap-2 text-sm text-(--text-secondary-dark) md:col-span-2">
                 <span>UCI License Number *</span>
                 <input
-                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-[color:var(--accent-secondary)]"
+                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
                   name="uciLicenseNumber"
                   onChange={event =>
                     handleFieldChange('uciLicenseNumber', event.target.value)
@@ -519,7 +542,7 @@ export function RaceRegistrationPage() {
                   value={formState.uciLicenseNumber}
                 />
                 {errors.uciLicenseNumber ? (
-                  <span className="text-sm text-[color:var(--accent-cta)]">
+                  <span className="text-sm text-(--accent-cta)">
                     {errors.uciLicenseNumber}
                   </span>
                 ) : null}
@@ -530,7 +553,7 @@ export function RaceRegistrationPage() {
               <span>Email *</span>
               <input
                 autoComplete="email"
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-[color:var(--accent-secondary)]"
+                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
                 name="email"
                 onChange={event =>
                   handleFieldChange('email', event.target.value)
@@ -540,14 +563,14 @@ export function RaceRegistrationPage() {
                 value={formState.email}
               />
               {errors.email ? (
-                <span className="text-sm text-[color:var(--accent-cta)]">
+                <span className="text-sm text-(--accent-cta)">
                   {errors.email}
                 </span>
               ) : null}
             </label>
           </div>
 
-          <div className="mt-8 rounded-[1.5rem] border border-white/10 bg-white/4 p-5">
+          <div className="mt-8 rounded-3xl border border-white/10 bg-white/4 p-5">
             <h3 className="font-heading text-xl font-semibold text-(--text-primary-dark)">
               Privacy Policy & Disclaimer
             </h3>
@@ -577,7 +600,7 @@ export function RaceRegistrationPage() {
               </span>
             </label>
             {errors.privacyAccepted ? (
-              <p className="mt-2 text-sm text-[color:var(--accent-cta)]">
+              <p className="mt-2 text-sm text-(--accent-cta)">
                 {errors.privacyAccepted}
               </p>
             ) : null}
@@ -609,7 +632,7 @@ export function RaceRegistrationPage() {
           </div>
 
           {submitError ? (
-            <p className="mt-4 text-sm leading-6 text-[color:var(--accent-cta)]">
+            <p className="mt-4 text-sm leading-6 text-(--accent-cta)">
               {submitError}
             </p>
           ) : null}
@@ -631,7 +654,7 @@ export function RaceRegistrationPage() {
               {sortedSubRaces.length > 0 ? (
                 sortedSubRaces.map(subRace => (
                   <span key={subRace.id} className="filter-chip">
-                    {subRace.name}
+                    {resolveRaceCategoryLabel(subRace.name, raceCategoryLabels)}
                   </span>
                 ))
               ) : (
