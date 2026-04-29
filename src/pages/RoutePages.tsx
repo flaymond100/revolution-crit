@@ -86,7 +86,10 @@ export function RacesPage() {
   });
 
   const tableRaces = sortRacesByDate(data ?? []);
-  const races = toRaceItems(data ?? [], createRaceCategoryLabelMap(raceCategories));
+  const races = toRaceItems(
+    data ?? [],
+    createRaceCategoryLabelMap(raceCategories)
+  );
 
   if (isLoading) {
     return (
