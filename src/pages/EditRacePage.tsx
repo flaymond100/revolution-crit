@@ -465,7 +465,9 @@ export function EditRacePage() {
             External results URL
             <input
               className="mt-2 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
-              onChange={event => setField('externalResultsUrl', event.target.value)}
+              onChange={event =>
+                setField('externalResultsUrl', event.target.value)
+              }
               placeholder="https://..."
               type="url"
               value={formState.externalResultsUrl}
@@ -536,9 +538,14 @@ export function EditRacePage() {
             disabled={updateRaceMutation.isPending}
             type="submit"
           >
-            {updateRaceMutation.isPending ? 'Saving changes...' : 'Save changes'}
+            {updateRaceMutation.isPending
+              ? 'Saving changes...'
+              : 'Save changes'}
           </button>
-          <Link className="ghost-button justify-center" to={`/calendar/${race.id}`}>
+          <Link
+            className="ghost-button justify-center"
+            to={`/calendar/${race.id}`}
+          >
             Cancel
           </Link>
         </div>
