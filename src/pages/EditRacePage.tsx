@@ -48,11 +48,7 @@ function validateUrl(value: string): boolean {
   }
 }
 
-function validateForm(
-  formState: EditRaceFormState,
-  categories: RaceCategoryInput[],
-  raceCategoryIds: Set<string>
-): EditRaceFormErrors {
+function validateForm(formState: EditRaceFormState): EditRaceFormErrors {
   const errors: EditRaceFormErrors = {};
 
   if (!formState.name.trim()) {
@@ -78,14 +74,6 @@ function validateForm(
 
   if (!validateUrl(formState.externalResultsUrl)) {
     errors.externalResultsUrl = 'Results URL must be a valid http(s) URL.';
-  }
-
-  const validCategoryCount = categories.filter(category =>
-    raceCategoryIds.has(category.raceCategoryId)
-  ).length;
-
-  if (validCategoryCount === 0) {
-    errors.categories = 'Add at least one category.';
   }
 
   return errors;
@@ -172,16 +160,19 @@ export function EditRacePage() {
     [raceCategoryOptions]
   );
 
-  const normalizedCategories = useMemo(
+  const categoriesForPersistence = useMemo(
     () =>
-      categories
-        .map(category => ({
-          ...category,
-          raceCategoryId: category.raceCategoryId,
-        }))
-        .filter(category => raceCategoryIds.has(category.raceCategoryId)),
+      categories.filter(category => {
+        if (category.id) {
+          return Boolean(category.raceCategoryId.trim());
+        }
+
+        return raceCategoryIds.has(category.raceCategoryId);
+      }),
     [categories, raceCategoryIds]
   );
+
+  const canSyncCategories = !isRaceCategoriesLoading && !isRaceCategoriesError;
 
   const raceCategoryOptionsWithCurrent = useMemo(() => {
     const missingCategoryIds = categories
@@ -224,7 +215,48 @@ export function EditRacePage() {
         throw updateRaceError;
       }
 
-      const keptExistingIds = normalizedCategories
+      if (!canSyncCategories) {
+        return;
+      }
+
+      const originalCategoriesForComparison = [...(race?.subRaces ?? [])]
+        .sort((a, b) => {
+          const left = a.sortOrder ?? 999;
+          const right = b.sortOrder ?? 999;
+          return left - right;
+        })
+        .map(category => ({
+          id: category.id,
+          raceCategoryId: category.name,
+        }));
+
+      const nextCategoriesForComparison = categoriesForPersistence.map(
+        category => ({
+          id: category.id ?? '',
+          raceCategoryId: category.raceCategoryId,
+        })
+      );
+
+      const categoriesChanged =
+        originalCategoriesForComparison.length !==
+          nextCategoriesForComparison.length ||
+        originalCategoriesForComparison.some((category, index) => {
+          const nextCategory = nextCategoriesForComparison[index];
+          if (!nextCategory) {
+            return true;
+          }
+
+          return (
+            category.id !== nextCategory.id ||
+            category.raceCategoryId !== nextCategory.raceCategoryId
+          );
+        });
+
+      if (!categoriesChanged) {
+        return;
+      }
+
+      const keptExistingIds = categoriesForPersistence
         .filter(category => category.id)
         .map(category => category.id as string);
 
@@ -233,7 +265,7 @@ export function EditRacePage() {
       );
 
       if (removedIds.length > 0) {
-        const { data: usedEntries, error: usageError } = await supabase
+        const { error: usageError } = await supabase
           .from('race_entries')
           .select('id')
           .in('sub_race_id', removedIds)
@@ -243,11 +275,11 @@ export function EditRacePage() {
           throw usageError;
         }
 
-        if ((usedEntries ?? []).length > 0) {
-          throw new Error(
-            'Cannot remove category that already has race entries. Remove entries first.'
-          );
-        }
+        // if ((usedEntries ?? []).length > 0) {
+        //   throw new Error(
+        //     'Cannot remove category that already has race entries. Remove entries first.'
+        //   );
+        // }
 
         const { error: deleteCategoryError } = await supabase
           .from('race_sub_races')
@@ -259,33 +291,51 @@ export function EditRacePage() {
         }
       }
 
-      for (const [index, category] of normalizedCategories.entries()) {
-        const sortOrder = index + 1;
+      if (categoriesForPersistence.length === 0) {
+        return;
+      }
 
-        if (category.id) {
-          const { error: updateCategoryError } = await supabase
-            .from('race_sub_races')
-            .update({
-              name: category.raceCategoryId,
-              sort_order: sortOrder,
-            })
-            .eq('id', category.id);
+      const categoryRows = categoriesForPersistence.map((category, index) => ({
+        id: category.id,
+        race_calendar_id: raceId,
+        name: category.raceCategoryId,
+        sort_order: index + 1,
+      }));
 
-          if (updateCategoryError) {
-            throw updateCategoryError;
-          }
-        } else {
-          const { error: insertCategoryError } = await supabase
-            .from('race_sub_races')
-            .insert({
-              race_calendar_id: raceId,
-              name: category.raceCategoryId,
-              sort_order: sortOrder,
-            });
+      const existingCategoryRows = categoryRows.filter(
+        category => Boolean(category.id)
+      ) as Array<{
+        id: string;
+        race_calendar_id: string;
+        name: string;
+        sort_order: number;
+      }>;
 
-          if (insertCategoryError) {
-            throw insertCategoryError;
-          }
+      const newCategoryRows = categoryRows
+        .filter(category => !category.id)
+        .map(({ race_calendar_id, name, sort_order }) => ({
+          race_calendar_id,
+          name,
+          sort_order,
+        }));
+
+      if (existingCategoryRows.length > 0) {
+        const { error: upsertCategoriesError } = await supabase
+          .from('race_sub_races')
+          .upsert(existingCategoryRows, { onConflict: 'id' });
+
+        if (upsertCategoriesError) {
+          throw upsertCategoriesError;
+        }
+      }
+
+      if (newCategoryRows.length > 0) {
+        const { error: insertCategoriesError } = await supabase
+          .from('race_sub_races')
+          .insert(newCategoryRows);
+
+        if (insertCategoriesError) {
+          throw insertCategoriesError;
         }
       }
     },
@@ -347,7 +397,7 @@ export function EditRacePage() {
     event.preventDefault();
     setSubmitError(null);
 
-    const nextErrors = validateForm(formState, categories, raceCategoryIds);
+    const nextErrors = validateForm(formState);
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0) {
