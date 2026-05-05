@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import {
   createRaceCategoryLabelMap,
   fetchRaceCategories,
@@ -94,7 +94,6 @@ function validateForm(
 
 export function RaceRegistrationPage() {
   const { slug } = useParams();
-  const navigate = useNavigate();
   const [formState, setFormState] =
     useState<RegistrationFormState>(initialFormState);
   const [errors, setErrors] = useState<RegistrationFormErrors>({});

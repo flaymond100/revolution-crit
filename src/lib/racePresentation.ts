@@ -98,6 +98,8 @@ export function toFallbackRaceCalendars(items: RaceItem[]): RaceCalendar[] {
         raceCalendarId: item.id,
         name: category,
         sortOrder: subRaceIndex + 1,
+        activePriceCents: null,
+        prices: [],
         entries: [],
         createdAt: '',
         updatedAt: '',
@@ -113,6 +115,7 @@ export function toFallbackRaceCalendars(items: RaceItem[]): RaceCalendar[] {
       externalResultsUrl: null,
       externalRegistrationUrl:
         item.registrationStatus === 'Registration Closed' ? null : '#',
+      internalRegistration: false,
       subRaces,
       createdAt: '',
       updatedAt: '',
