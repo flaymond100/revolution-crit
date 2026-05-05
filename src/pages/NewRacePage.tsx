@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 type RaceCategoryInput = {
   id: string;
   raceCategoryId: string;
+  amountEur: string;
 };
 
 type NewRaceFormState = {
@@ -17,6 +18,7 @@ type NewRaceFormState = {
   description: string;
   externalRegistrationUrl: string;
   externalResultsUrl: string;
+  internalRegistration: boolean;
 };
 
 type NewRaceFormErrors = Partial<Record<keyof NewRaceFormState, string>> & {
@@ -31,6 +33,7 @@ const initialFormState: NewRaceFormState = {
   description: '',
   externalRegistrationUrl: '',
   externalResultsUrl: '',
+  internalRegistration: false,
 };
 
 function validateUrl(value: string): boolean {
@@ -106,7 +109,7 @@ export function NewRacePage() {
   const [formState, setFormState] =
     useState<NewRaceFormState>(initialFormState);
   const [categories, setCategories] = useState<RaceCategoryInput[]>([
-    { id: crypto.randomUUID(), raceCategoryId: '' },
+    { id: crypto.randomUUID(), raceCategoryId: '', amountEur: '' },
   ]);
   const [errors, setErrors] = useState<NewRaceFormErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -150,6 +153,7 @@ export function NewRacePage() {
           external_registration_url:
             formState.externalRegistrationUrl.trim() || null,
           external_results_url: formState.externalResultsUrl.trim() || null,
+          internal_registration: formState.internalRegistration,
         })
         .select('id')
         .single();
@@ -161,7 +165,7 @@ export function NewRacePage() {
       const raceId = insertedRace.id as string;
 
       if (cleanedCategories.length > 0) {
-        const { error: categoriesError } = await supabase
+        const { data: insertedSubRaces, error: categoriesError } = await supabase
           .from('race_sub_races')
           .insert(
             cleanedCategories.map(category => ({
@@ -169,10 +173,27 @@ export function NewRacePage() {
               name: category.name,
               sort_order: category.sort_order,
             }))
-          );
+          )
+          .select('id, name');
 
         if (categoriesError) {
           throw categoriesError;
+        }
+
+        const priceRows = (insertedSubRaces ?? []).flatMap(subRace => {
+          const input = categories.find(c => c.raceCategoryId === subRace.name);
+          const cents = Math.round(parseFloat(input?.amountEur ?? '') * 100);
+          if (!input?.amountEur.trim() || !Number.isFinite(cents) || cents < 1) {
+            return [];
+          }
+          return [{ sub_race_id: subRace.id, label: 'Standard', amount_cents: cents, valid_from: new Date().toISOString() }];
+        });
+
+        if (priceRows.length > 0) {
+          const { error: pricesError } = await supabase
+            .from('race_sub_race_prices')
+            .insert(priceRows);
+          if (pricesError) throw pricesError;
         }
       }
 
@@ -215,7 +236,7 @@ export function NewRacePage() {
   function addCategory() {
     setCategories(current => [
       ...current,
-      { id: crypto.randomUUID(), raceCategoryId: '' },
+      { id: crypto.randomUUID(), raceCategoryId: '', amountEur: '' },
     ]);
   }
 
@@ -337,6 +358,16 @@ export function NewRacePage() {
             />
           </label>
 
+          <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-(--text-secondary-dark) md:col-span-2">
+            <input
+              checked={formState.internalRegistration}
+              className="h-4 w-4 rounded"
+              onChange={event => setField('internalRegistration', event.target.checked)}
+              type="checkbox"
+            />
+            Use internal registration (Stripe) — uncheck to use external URL
+          </label>
+
           <label className="block text-sm text-(--text-secondary-dark)">
             External registration URL
             <input
@@ -413,6 +444,24 @@ export function NewRacePage() {
                     </option>
                   ))}
                 </select>
+                <div className="relative w-32 shrink-0">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-(--text-secondary-dark)">€</span>
+                  <input
+                    className="w-full rounded-xl border border-white/15 bg-white/5 py-2.5 pl-7 pr-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+                    min="0"
+                    onChange={event =>
+                      setCategories(current =>
+                        current.map(c =>
+                          c.id === category.id ? { ...c, amountEur: event.target.value } : c
+                        )
+                      )
+                    }
+                    placeholder="0.00"
+                    step="0.01"
+                    type="number"
+                    value={category.amountEur}
+                  />
+                </div>
                 <button
                   className="ghost-button px-3 py-2"
                   disabled={categories.length === 1}

@@ -38,8 +38,19 @@ export interface RaceCalendarRow {
   description: string | null;
   external_results_url: string | null;
   external_registration_url: string | null;
+  internal_registration: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface SubRacePriceTierRow {
+  id: UUID;
+  sub_race_id: UUID;
+  label: string;
+  amount_cents: number;
+  valid_from: string;
+  valid_until: string | null;
+  created_at: string;
 }
 
 export interface RaceSubRaceRow {
@@ -117,6 +128,8 @@ export interface RaceSubRace {
   raceCalendarId: UUID;
   name: string;
   sortOrder: number | null;
+  activePriceCents: number | null;
+  prices: SubRacePriceTierRow[];
   entries?: RaceEntry[];
   createdAt: string;
   updatedAt: string;
@@ -130,6 +143,7 @@ export interface RaceCalendar {
   location: string;
   externalResultsUrl: string | null;
   externalRegistrationUrl: string | null;
+  internalRegistration: boolean;
   subRaces?: RaceSubRace[];
   description?: string | null;
   createdAt: string;
@@ -145,6 +159,7 @@ export interface RaceCalendarWithRelations {
   description: string | null;
   external_results_url: string | null;
   external_registration_url: string | null;
+  internal_registration: boolean;
   created_at: string;
   updated_at: string;
   race_sub_races: Array<{
@@ -154,6 +169,15 @@ export interface RaceCalendarWithRelations {
     sort_order: number | null;
     created_at: string;
     updated_at: string;
+    race_sub_race_prices: Array<{
+      id: UUID;
+      sub_race_id: UUID;
+      label: string;
+      amount_cents: number;
+      valid_from: string;
+      valid_until: string | null;
+      created_at: string;
+    }>;
     race_entries: Array<{
       id: UUID;
       sub_race_id: UUID;

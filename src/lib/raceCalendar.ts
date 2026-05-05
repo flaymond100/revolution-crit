@@ -5,8 +5,21 @@ import type {
   RaceCalendarWithRelations,
   RaceEntry,
   RaceSubRace,
+  SubRacePriceTierRow,
 } from '../types';
 import { supabase } from './supabase';
+
+function resolveActivePriceCents(prices: SubRacePriceTierRow[]): number | null {
+  const now = new Date();
+  const active = prices
+    .filter(p => {
+      const from = new Date(p.valid_from);
+      const until = p.valid_until ? new Date(p.valid_until) : null;
+      return from <= now && (until === null || until > now);
+    })
+    .sort((a, b) => new Date(b.valid_from).getTime() - new Date(a.valid_from).getTime())[0];
+  return active?.amount_cents ?? null;
+}
 
 export function mapParticipant(row: ParticipantRow): Participant {
   return {
@@ -50,11 +63,14 @@ export function mapRaceEntry(
 export function mapRaceSubRace(
   row: RaceCalendarWithRelations['race_sub_races'][number]
 ): RaceSubRace {
+  const prices = row.race_sub_race_prices ?? [];
   return {
     id: row.id,
     raceCalendarId: row.race_calendar_id,
     name: row.name,
     sortOrder: row.sort_order,
+    activePriceCents: resolveActivePriceCents(prices),
+    prices,
     entries: row.race_entries?.map(mapRaceEntry) ?? [],
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -71,6 +87,7 @@ export function mapRaceCalendar(row: RaceCalendarWithRelations): RaceCalendar {
     description: row.description,
     externalResultsUrl: row.external_results_url,
     externalRegistrationUrl: row.external_registration_url,
+    internalRegistration: row.internal_registration,
     subRaces: row.race_sub_races?.map(mapRaceSubRace) ?? [],
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -86,6 +103,7 @@ const raceCalendarSelect = `
   description,
   external_results_url,
   external_registration_url,
+  internal_registration,
   created_at,
   updated_at,
   race_sub_races (
@@ -95,6 +113,15 @@ const raceCalendarSelect = `
     sort_order,
     created_at,
     updated_at,
+    race_sub_race_prices (
+      id,
+      sub_race_id,
+      label,
+      amount_cents,
+      valid_from,
+      valid_until,
+      created_at
+    ),
     race_entries (
       id,
       sub_race_id,

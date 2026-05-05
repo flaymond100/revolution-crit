@@ -9,6 +9,7 @@ type RaceCategoryInput = {
   clientId: string;
   id?: string;
   raceCategoryId: string;
+  amountEur: string;
 };
 
 type EditRaceFormState = {
@@ -19,6 +20,7 @@ type EditRaceFormState = {
   description: string;
   externalRegistrationUrl: string;
   externalResultsUrl: string;
+  internalRegistration: boolean;
 };
 
 type EditRaceFormErrors = Partial<Record<keyof EditRaceFormState, string>> & {
@@ -33,6 +35,7 @@ const initialFormState: EditRaceFormState = {
   description: '',
   externalRegistrationUrl: '',
   externalResultsUrl: '',
+  internalRegistration: false,
 };
 
 function validateUrl(value: string): boolean {
@@ -133,6 +136,7 @@ export function EditRacePage() {
       description: race.description ?? '',
       externalRegistrationUrl: race.externalRegistrationUrl ?? '',
       externalResultsUrl: race.externalResultsUrl ?? '',
+      internalRegistration: race.internalRegistration,
     });
 
     const sortedCategories = [...(race.subRaces ?? [])].sort((a, b) => {
@@ -141,16 +145,19 @@ export function EditRacePage() {
       return left - right;
     });
 
-    const initialCategories = sortedCategories.map(category => ({
+    const initialCategories: RaceCategoryInput[] = sortedCategories.map(category => ({
       clientId: crypto.randomUUID(),
       id: category.id,
       raceCategoryId: category.name,
+      amountEur: category.activePriceCents !== null
+        ? (category.activePriceCents / 100).toFixed(2)
+        : '',
     }));
 
     setCategories(
       initialCategories.length > 0
         ? initialCategories
-        : [{ clientId: crypto.randomUUID(), raceCategoryId: '' }]
+        : [{ clientId: crypto.randomUUID(), raceCategoryId: '', amountEur: '' }]
     );
     setOriginalCategoryIds(sortedCategories.map(category => category.id));
   }, [race]);
@@ -208,6 +215,7 @@ export function EditRacePage() {
           external_registration_url:
             formState.externalRegistrationUrl.trim() || null,
           external_results_url: formState.externalResultsUrl.trim() || null,
+          internal_registration: formState.internalRegistration,
         })
         .eq('id', raceId);
 
@@ -338,6 +346,32 @@ export function EditRacePage() {
           throw insertCategoriesError;
         }
       }
+
+      // Re-fetch all sub-race IDs for this race to sync prices
+      const { data: allSubRaces, error: subRaceFetchError } = await supabase
+        .from('race_sub_races')
+        .select('id, name')
+        .eq('race_calendar_id', raceId);
+
+      if (subRaceFetchError) throw subRaceFetchError;
+
+      const subRaceIds = (allSubRaces ?? []).map(s => s.id as string);
+
+      if (subRaceIds.length > 0) {
+        await supabase.from('race_sub_race_prices').delete().in('sub_race_id', subRaceIds);
+
+        const priceRows = (allSubRaces ?? []).flatMap(subRace => {
+          const input = categoriesForPersistence.find(c => c.id === subRace.id || c.raceCategoryId === subRace.name);
+          const cents = Math.round(parseFloat(input?.amountEur ?? '') * 100);
+          if (!input?.amountEur?.trim() || !Number.isFinite(cents) || cents < 1) return [];
+          return [{ sub_race_id: subRace.id, label: 'Standard', amount_cents: cents, valid_from: new Date().toISOString() }];
+        });
+
+        if (priceRows.length > 0) {
+          const { error: pricesError } = await supabase.from('race_sub_race_prices').insert(priceRows);
+          if (pricesError) throw pricesError;
+        }
+      }
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['race-calendar'] });
@@ -379,7 +413,7 @@ export function EditRacePage() {
   function addCategory() {
     setCategories(current => [
       ...current,
-      { clientId: crypto.randomUUID(), raceCategoryId: '' },
+      { clientId: crypto.randomUUID(), raceCategoryId: '', amountEur: '' },
     ]);
   }
 
@@ -528,6 +562,16 @@ export function EditRacePage() {
             />
           </label>
 
+          <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-(--text-secondary-dark) md:col-span-2">
+            <input
+              checked={formState.internalRegistration}
+              className="h-4 w-4 rounded"
+              onChange={event => setField('internalRegistration', event.target.checked)}
+              type="checkbox"
+            />
+            Use internal registration (Stripe) — uncheck to use external URL
+          </label>
+
           <label className="block text-sm text-(--text-secondary-dark)">
             External registration URL
             <input
@@ -604,6 +648,24 @@ export function EditRacePage() {
                     </option>
                   ))}
                 </select>
+                <div className="relative w-32 shrink-0">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-(--text-secondary-dark)">€</span>
+                  <input
+                    className="w-full rounded-xl border border-white/15 bg-white/5 py-2.5 pl-7 pr-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+                    min="0"
+                    onChange={event =>
+                      setCategories(current =>
+                        current.map(c =>
+                          c.clientId === category.clientId ? { ...c, amountEur: event.target.value } : c
+                        )
+                      )
+                    }
+                    placeholder="0.00"
+                    step="0.01"
+                    type="number"
+                    value={category.amountEur}
+                  />
+                </div>
                 <button
                   className="ghost-button px-3 py-2"
                   disabled={categories.length === 1}

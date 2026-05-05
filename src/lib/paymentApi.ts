@@ -2,8 +2,6 @@
  * Payload for creating a checkout session in the backend payment service.
  */
 export type CreatePaymentCheckoutPayload = {
-  amount: number;
-  currency: string;
   subRaceId: string;
   participant: {
     fullName: string;

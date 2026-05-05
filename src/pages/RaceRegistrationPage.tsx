@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   createRaceCategoryLabelMap,
   fetchRaceCategories,
@@ -94,7 +94,7 @@ function validateForm(
 
 export function RaceRegistrationPage() {
   const { slug } = useParams();
-  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [formState, setFormState] =
     useState<RegistrationFormState>(initialFormState);
   const [errors, setErrors] = useState<RegistrationFormErrors>({});
@@ -157,14 +157,17 @@ export function RaceRegistrationPage() {
     [raceCategories]
   );
 
-  const { refetch: runTest } = useQuery({
-    queryKey: ['test'],
-    queryFn: () => fetch(`http://localhost:3003/test`).then(res => res.json()),
-    enabled: false,
-  });
+  const selectedSubRace = useMemo(
+    () => sortedSubRaces.find(s => s.id === formState.startingClass) ?? null,
+    [sortedSubRaces, formState.startingClass]
+  );
 
-  const formDisabled = sortedSubRaces.length === 0 || paymentMutation.isPending;
-  const paymentState = searchParams.get('payment');
+  const activePriceCents = selectedSubRace?.activePriceCents ?? null;
+
+  const formDisabled =
+    sortedSubRaces.length === 0 ||
+    activePriceCents === null ||
+    paymentMutation.isPending;
 
   const isEliteClassSelected = useMemo(() => {
     const selectedSubRace = sortedSubRaces.find(
@@ -242,27 +245,16 @@ export function RaceRegistrationPage() {
       return;
     }
 
-    const amount = Number(
-      import.meta.env.VITE_REGISTRATION_AMOUNT_CENTS ?? 2000
-    );
-    const currency =
-      (import.meta.env.VITE_REGISTRATION_CURRENCY as string) ?? 'EUR';
-
-    if (!Number.isFinite(amount) || amount < 50 || !currency) {
-      setSubmitError(
-        'Payment configuration is missing. Set VITE_REGISTRATION_AMOUNT_CENTS (minimum 50) and VITE_REGISTRATION_CURRENCY.'
-      );
+    if (activePriceCents === null) {
+      setSubmitError('No price configured for this starting class.');
       return;
     }
 
     const baseUrl = window.location.origin;
     const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
-    const returnPath = `${basePath}/calendar/${race.id}/register`;
 
     try {
       const { checkoutUrl } = await paymentMutation.mutateAsync({
-        amount,
-        currency,
         subRaceId: formState.startingClass,
         participant: {
           fullName: `${formState.firstName} ${formState.lastName}`.trim(),
@@ -273,8 +265,8 @@ export function RaceRegistrationPage() {
           nation: formState.nation,
           uciLicenseNumber: formState.uciLicenseNumber || undefined,
         },
-        successUrl: `${baseUrl}${returnPath}?payment=success`,
-        cancelUrl: `${baseUrl}${returnPath}?payment=cancelled`,
+        successUrl: `${baseUrl}${basePath}/registration-success`,
+        cancelUrl: `${baseUrl}${basePath}/calendar/${race.id}/register?payment=cancelled`,
       });
 
       window.location.assign(checkoutUrl);
@@ -356,20 +348,6 @@ export function RaceRegistrationPage() {
           noValidate
           onSubmit={handleSubmit}
         >
-          {paymentState === 'success' ? (
-            <div className="mb-6 rounded-3xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm leading-6 text-emerald-100">
-              Payment completed successfully. Your registration has been
-              submitted.
-            </div>
-          ) : null}
-
-          {paymentState === 'cancelled' ? (
-            <div className="mb-6 rounded-3xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-100">
-              Payment was cancelled. Review your details and try again when
-              ready.
-            </div>
-          ) : null}
-
           <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-5">
             <div>
               <h2 className="font-heading text-2xl font-semibold text-(--text-primary-dark)">
@@ -606,7 +584,20 @@ export function RaceRegistrationPage() {
             ) : null}
           </div>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          {activePriceCents !== null ? (
+            <div className="mt-6 rounded-2xl border border-white/10 bg-white/4 px-4 py-3 text-sm text-(--text-secondary-dark)">
+              Registration fee:{' '}
+              <span className="font-semibold text-(--text-primary-dark)">
+                €{(activePriceCents / 100).toFixed(2)}
+              </span>
+            </div>
+          ) : sortedSubRaces.length > 0 ? (
+            <div className="mt-6 rounded-2xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+              No price configured for this starting class. Contact the organizers.
+            </div>
+          ) : null}
+
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <button
               className="cta-button w-full justify-center disabled:cursor-not-allowed disabled:opacity-50"
               disabled={formDisabled}
@@ -615,13 +606,6 @@ export function RaceRegistrationPage() {
               {paymentMutation.isPending
                 ? 'Redirecting to checkout...'
                 : 'Continue to payment'}
-            </button>
-            <button
-              className="ghost-button w-full justify-center"
-              onClick={() => runTest()}
-              type="button"
-            >
-              Test
             </button>
             <Link
               className="ghost-button w-full justify-center"

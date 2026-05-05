@@ -454,7 +454,14 @@ export function RaceDetailPage() {
         ) : null}
 
         <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-          {race.externalRegistrationUrl ? (
+          {race.internalRegistration ? (
+            <Link
+              className="cta-button w-full justify-center sm:w-auto"
+              to={`/calendar/${race.id}/register`}
+            >
+              Register now
+            </Link>
+          ) : race.externalRegistrationUrl ? (
             <Link
               className="cta-button w-full justify-center sm:w-auto"
               target="_blank"

@@ -8,6 +8,7 @@ import { EditRacePage } from './pages/EditRacePage';
 import { LoginPage } from './pages/LoginPage';
 import { NewRacePage } from './pages/NewRacePage';
 import { RaceRegistrationPage } from './pages/RaceRegistrationPage';
+import { RegistrationSuccessPage } from './pages/RegistrationSuccessPage';
 import {
   AboutPage,
   CategoriesPage,
@@ -44,14 +45,8 @@ function App() {
           <Route element={<HomePage />} path="/" />
           <Route element={<RacesPage />} path="/calendar" />
           <Route element={<RaceDetailPage />} path="/calendar/:slug" />
-          <Route
-            element={
-              <RequireAuth>
-                <RaceRegistrationPage />
-              </RequireAuth>
-            }
-            path="/calendar/:slug/register"
-          />
+          <Route element={<RaceRegistrationPage />} path="/calendar/:slug/register" />
+          <Route element={<RegistrationSuccessPage />} path="/registration-success" />
           <Route
             element={
               <RequireAuth>
