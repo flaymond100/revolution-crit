@@ -592,7 +592,8 @@ export function RaceRegistrationPage() {
             </div>
           ) : sortedSubRaces.length > 0 ? (
             <div className="mt-6 rounded-2xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-              No price configured for this starting class. Contact the organizers.
+              No price configured for this starting class. Contact the
+              organizers.
             </div>
           ) : null}
 
