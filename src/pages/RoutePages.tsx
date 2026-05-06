@@ -8,6 +8,7 @@ import { RaceTable } from '../components/RaceTable';
 import {
   createRaceCategoryLabelMap,
   fetchRaceCategories,
+  resolveRaceCategoryLabel,
 } from '../lib/raceCategories';
 import { fetchRaceCalendars } from '../lib/raceCalendar';
 import { toRaceItems } from '../lib/racePresentation';
@@ -223,6 +224,26 @@ export function RaceDetailPage() {
       setSelectedSubRaceId(sortedSubRaces[0].id);
     }
   }, [selectedSubRaceId, sortedSubRaces]);
+
+  const { data: raceCategories = [] } = useQuery({
+    queryKey: ['race-categories'],
+    queryFn: fetchRaceCategories,
+  });
+
+  const raceCategoryLabels = useMemo(
+    () => createRaceCategoryLabelMap(raceCategories),
+    [raceCategories]
+  );
+
+  const selectedSubRace = useMemo(
+    () => sortedSubRaces.find(s => s.id === selectedSubRaceId) ?? null,
+    [sortedSubRaces, selectedSubRaceId]
+  );
+
+  const paidEntries = useMemo(
+    () => (selectedSubRace?.entries ?? []).filter(e => e.isPaid),
+    [selectedSubRace]
+  );
 
   const formattedDate = useMemo(() => {
     if (!race?.raceDate) {
@@ -505,6 +526,81 @@ export function RaceDetailPage() {
           </p>
         ) : null}
       </div>
+
+      {sortedSubRaces.length > 0 ? (
+        <div className="surface-panel p-6 sm:p-8">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
+            <div>
+              <span className="eyebrow">Participants</span>
+              <h2 className="mt-3 font-heading text-2xl font-semibold text-(--text-primary-dark) sm:text-3xl">
+                Registered for{' '}
+                {selectedSubRace
+                  ? resolveRaceCategoryLabel(selectedSubRace.name, raceCategoryLabels)
+                  : '—'}
+              </h2>
+              <p className="mt-2 text-sm text-(--text-secondary-dark)">
+                {paidEntries.length}{' '}
+                {paidEntries.length === 1 ? 'rider' : 'riders'} registered.
+              </p>
+            </div>
+            <select
+              className="rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+              onChange={event => setSelectedSubRaceId(event.target.value)}
+              value={selectedSubRaceId}
+            >
+              {sortedSubRaces.map(subRace => (
+                <option key={subRace.id} value={subRace.id}>
+                  {resolveRaceCategoryLabel(subRace.name, raceCategoryLabels)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {paidEntries.length === 0 ? (
+            <p className="mt-6 text-sm text-(--text-secondary-dark)">
+              No registered participants yet. Be the first to sign up.
+            </p>
+          ) : (
+            <div className="mt-6 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-white/10 text-(--text-secondary-dark)">
+                    <th className="px-3 py-3 font-medium">#</th>
+                    <th className="px-3 py-3 font-medium">Name</th>
+                    <th className="px-3 py-3 font-medium">Team</th>
+                    <th className="px-3 py-3 font-medium">Nation</th>
+                    <th className="px-3 py-3 font-medium">Bib</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paidEntries.map((entry, index) => (
+                    <tr
+                      key={entry.id}
+                      className="border-b border-white/5 last:border-0"
+                    >
+                      <td className="px-3 py-3 text-(--text-secondary-dark)">
+                        {index + 1}
+                      </td>
+                      <td className="px-3 py-3 text-(--text-primary-dark)">
+                        {entry.participant?.fullName ?? '—'}
+                      </td>
+                      <td className="px-3 py-3 text-(--text-secondary-dark)">
+                        {entry.participant?.teamName ?? '—'}
+                      </td>
+                      <td className="px-3 py-3 text-(--text-secondary-dark)">
+                        {entry.participant?.nationality ?? '—'}
+                      </td>
+                      <td className="px-3 py-3 text-(--text-secondary-dark)">
+                        {entry.bibNumber ?? '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      ) : null}
     </section>
   );
 }
