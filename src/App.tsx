@@ -8,6 +8,7 @@ import { EditRacePage } from './pages/EditRacePage';
 import { LoginPage } from './pages/LoginPage';
 import { NewRacePage } from './pages/NewRacePage';
 import { RaceRegistrationPage } from './pages/RaceRegistrationPage';
+import { RaceResultsPage } from './pages/RaceResultsPage';
 import { RegistrationSuccessPage } from './pages/RegistrationSuccessPage';
 import {
   AboutPage,
@@ -62,6 +63,14 @@ function App() {
               </RequireAuth>
             }
             path="/races/:raceId/edit"
+          />
+          <Route
+            element={
+              <RequireAuth>
+                <RaceResultsPage />
+              </RequireAuth>
+            }
+            path="/races/:raceId/results"
           />
           <Route element={<LoginPage />} path="/login" />
           <Route element={<ResultsPage />} path="/results" />

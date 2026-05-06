@@ -240,9 +240,21 @@ export function RaceDetailPage() {
     [sortedSubRaces, selectedSubRaceId]
   );
 
-  const paidEntries = useMemo(
-    () => (selectedSubRace?.entries ?? []).filter(e => e.isPaid),
-    [selectedSubRace]
+  const visibleEntries = useMemo(() => {
+    const entries = selectedSubRace?.entries ?? [];
+    const sorted = [...entries].sort((a, b) => {
+      // Finished entries with positions first, sorted by position; then everything else
+      if (a.position !== null && b.position !== null) return a.position - b.position;
+      if (a.position !== null) return -1;
+      if (b.position !== null) return 1;
+      return 0;
+    });
+    return sorted;
+  }, [selectedSubRace]);
+
+  const hasResults = useMemo(
+    () => visibleEntries.some(e => e.position !== null || e.timeText || e.status),
+    [visibleEntries]
   );
 
   const formattedDate = useMemo(() => {
@@ -510,6 +522,14 @@ export function RaceDetailPage() {
             </Link>
           ) : null}
           {session ? (
+            <Link
+              className="ghost-button w-full justify-center sm:w-auto"
+              to={`/races/${race.id}/results`}
+            >
+              Edit results
+            </Link>
+          ) : null}
+          {session ? (
             <button
               className="ghost-button w-full justify-center border-rose-400/40 text-rose-200 hover:bg-rose-500/12 sm:w-auto"
               disabled={isDeleting}
@@ -539,8 +559,9 @@ export function RaceDetailPage() {
                   : '—'}
               </h2>
               <p className="mt-2 text-sm text-(--text-secondary-dark)">
-                {paidEntries.length}{' '}
-                {paidEntries.length === 1 ? 'rider' : 'riders'} registered.
+                {visibleEntries.length}{' '}
+                {visibleEntries.length === 1 ? 'rider' : 'riders'}
+                {hasResults ? ' — results posted' : ' registered'}.
               </p>
             </div>
             <select
@@ -556,7 +577,7 @@ export function RaceDetailPage() {
             </select>
           </div>
 
-          {paidEntries.length === 0 ? (
+          {visibleEntries.length === 0 ? (
             <p className="mt-6 text-sm text-(--text-secondary-dark)">
               No registered participants yet. Be the first to sign up.
             </p>
@@ -570,10 +591,17 @@ export function RaceDetailPage() {
                     <th className="px-3 py-3 font-medium">Team</th>
                     <th className="px-3 py-3 font-medium">Nation</th>
                     <th className="px-3 py-3 font-medium">Bib</th>
+                    {hasResults ? (
+                      <>
+                        <th className="px-3 py-3 font-medium">Pos</th>
+                        <th className="px-3 py-3 font-medium">Time</th>
+                        <th className="px-3 py-3 font-medium">Status</th>
+                      </>
+                    ) : null}
                   </tr>
                 </thead>
                 <tbody>
-                  {paidEntries.map((entry, index) => (
+                  {visibleEntries.map((entry, index) => (
                     <tr
                       key={entry.id}
                       className="border-b border-white/5 last:border-0"
@@ -593,6 +621,19 @@ export function RaceDetailPage() {
                       <td className="px-3 py-3 text-(--text-secondary-dark)">
                         {entry.bibNumber ?? '—'}
                       </td>
+                      {hasResults ? (
+                        <>
+                          <td className="px-3 py-3 text-(--text-primary-dark)">
+                            {entry.position ?? '—'}
+                          </td>
+                          <td className="px-3 py-3 text-(--text-secondary-dark)">
+                            {entry.timeText ?? '—'}
+                          </td>
+                          <td className="px-3 py-3 text-(--text-secondary-dark) uppercase">
+                            {entry.status ?? '—'}
+                          </td>
+                        </>
+                      ) : null}
                     </tr>
                   ))}
                 </tbody>
