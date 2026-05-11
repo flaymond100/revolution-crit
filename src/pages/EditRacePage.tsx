@@ -227,43 +227,6 @@ export function EditRacePage() {
         return;
       }
 
-      const originalCategoriesForComparison = [...(race?.subRaces ?? [])]
-        .sort((a, b) => {
-          const left = a.sortOrder ?? 999;
-          const right = b.sortOrder ?? 999;
-          return left - right;
-        })
-        .map(category => ({
-          id: category.id,
-          raceCategoryId: category.name,
-        }));
-
-      const nextCategoriesForComparison = categoriesForPersistence.map(
-        category => ({
-          id: category.id ?? '',
-          raceCategoryId: category.raceCategoryId,
-        })
-      );
-
-      const categoriesChanged =
-        originalCategoriesForComparison.length !==
-          nextCategoriesForComparison.length ||
-        originalCategoriesForComparison.some((category, index) => {
-          const nextCategory = nextCategoriesForComparison[index];
-          if (!nextCategory) {
-            return true;
-          }
-
-          return (
-            category.id !== nextCategory.id ||
-            category.raceCategoryId !== nextCategory.raceCategoryId
-          );
-        });
-
-      if (!categoriesChanged) {
-        return;
-      }
-
       const keptExistingIds = categoriesForPersistence
         .filter(category => category.id)
         .map(category => category.id as string);
