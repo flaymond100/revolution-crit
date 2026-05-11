@@ -1,0 +1,82 @@
+export type RegistrationFormState = {
+  firstName: string;
+  lastName: string;
+  birthDate: string;
+  gender: string;
+  clubTeam: string;
+  nation: string;
+  startingClass: string;
+  uciLicenseNumber: string;
+  email: string;
+  privacyAccepted: boolean;
+};
+
+export type RegistrationFormErrors = Partial<
+  Record<keyof RegistrationFormState, string>
+>;
+
+export const initialFormState: RegistrationFormState = {
+  firstName: 'Kostas',
+  lastName: 'Testing',
+  birthDate: '2000-01-01',
+  gender: 'male',
+  clubTeam: 'Test',
+  nation: 'GER',
+  startingClass: 'Amateur',
+  uciLicenseNumber: '',
+  email: 'test@gmail.com',
+  privacyAccepted: true,
+};
+
+export const genderOptions = [
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+  { value: 'other', label: 'Other' },
+];
+
+export function validateForm(
+  state: RegistrationFormState,
+  isEliteClassSelected: boolean
+): RegistrationFormErrors {
+  const errors: RegistrationFormErrors = {};
+
+  if (!state.firstName.trim()) {
+    errors.firstName = 'First name is required.';
+  }
+
+  if (!state.lastName.trim()) {
+    errors.lastName = 'Last name is required.';
+  }
+
+  if (!state.birthDate) {
+    errors.birthDate = 'Birth date is required.';
+  }
+
+  if (!state.gender) {
+    errors.gender = 'Gender is required.';
+  }
+
+  if (!state.nation.trim()) {
+    errors.nation = 'Nation is required.';
+  }
+
+  if (!state.startingClass) {
+    errors.startingClass = 'Starting class is required.';
+  }
+
+  if (isEliteClassSelected && !state.uciLicenseNumber.trim()) {
+    errors.uciLicenseNumber = 'UCI license number is required for Elite class.';
+  }
+
+  if (!state.email.trim()) {
+    errors.email = 'Email is required.';
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)) {
+    errors.email = 'Enter a valid email address.';
+  }
+
+  if (!state.privacyAccepted) {
+    errors.privacyAccepted = 'You must accept the privacy policy.';
+  }
+
+  return errors;
+}

@@ -8,89 +8,13 @@ import {
 } from '../lib/raceCategories';
 import { fetchRaceCalendarById } from '../lib/raceCalendar';
 import { createPaymentCheckout } from '../lib/paymentApi';
-
-type RegistrationFormState = {
-  firstName: string;
-  lastName: string;
-  birthDate: string;
-  gender: string;
-  clubTeam: string;
-  nation: string;
-  startingClass: string;
-  uciLicenseNumber: string;
-  email: string;
-  privacyAccepted: boolean;
-};
-
-type RegistrationFormErrors = Partial<
-  Record<keyof RegistrationFormState, string>
->;
-
-const initialFormState: RegistrationFormState = {
-  firstName: 'Kostas',
-  lastName: 'Testing',
-  birthDate: '2000-01-01',
-  gender: 'male',
-  clubTeam: 'Test',
-  nation: 'GER',
-  startingClass: 'Amateur',
-  uciLicenseNumber: '',
-  email: 'test@gmail.com',
-  privacyAccepted: true,
-};
-
-const genderOptions = [
-  { value: 'male', label: 'Male' },
-  { value: 'female', label: 'Female' },
-  { value: 'other', label: 'Other' },
-];
-
-function validateForm(
-  state: RegistrationFormState,
-  isEliteClassSelected: boolean
-): RegistrationFormErrors {
-  const errors: RegistrationFormErrors = {};
-
-  if (!state.firstName.trim()) {
-    errors.firstName = 'First name is required.';
-  }
-
-  if (!state.lastName.trim()) {
-    errors.lastName = 'Last name is required.';
-  }
-
-  if (!state.birthDate) {
-    errors.birthDate = 'Birth date is required.';
-  }
-
-  if (!state.gender) {
-    errors.gender = 'Gender is required.';
-  }
-
-  if (!state.nation.trim()) {
-    errors.nation = 'Nation is required.';
-  }
-
-  if (!state.startingClass) {
-    errors.startingClass = 'Starting class is required.';
-  }
-
-  if (isEliteClassSelected && !state.uciLicenseNumber.trim()) {
-    errors.uciLicenseNumber = 'UCI license number is required for Elite class.';
-  }
-
-  if (!state.email.trim()) {
-    errors.email = 'Email is required.';
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)) {
-    errors.email = 'Enter a valid email address.';
-  }
-
-  if (!state.privacyAccepted) {
-    errors.privacyAccepted = 'You must accept the privacy policy.';
-  }
-
-  return errors;
-}
+import {
+  genderOptions,
+  initialFormState,
+  validateForm,
+  type RegistrationFormErrors,
+  type RegistrationFormState,
+} from './utils';
 
 export function RaceRegistrationPage() {
   const { slug } = useParams();
@@ -233,7 +157,7 @@ export function RaceRegistrationPage() {
     });
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const nextErrors = validateForm(formState, isEliteClassSelected);
@@ -277,50 +201,11 @@ export function RaceRegistrationPage() {
   };
 
   if (isLoading) {
-    return (
-      <section className="page-shell">
-        <div className="surface-panel p-6 sm:p-8">
-          <div className="h-4 w-40 animate-pulse rounded bg-white/10" />
-          <div className="mt-4 h-11 w-full max-w-3xl animate-pulse rounded bg-white/10" />
-          <div className="mt-5 h-5 w-full max-w-2xl animate-pulse rounded bg-white/8" />
-        </div>
-        <div className="surface-panel p-6 sm:p-8">
-          <div className="grid gap-4 md:grid-cols-2">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-20 animate-pulse rounded-3xl bg-white/6"
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-    );
+    return <Loader />;
   }
 
   if (isError || !race) {
-    return (
-      <section className="page-shell">
-        <div className="surface-panel p-8 text-center sm:p-10">
-          <span className="eyebrow">Registration</span>
-          <h1 className="mt-5 font-heading text-4xl font-semibold text-(--text-primary-dark) sm:text-5xl">
-            Race not found.
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-(--text-secondary-dark)">
-            We could not load this registration form. The race may be
-            unpublished or the link is incorrect.
-          </p>
-          <div className="mx-auto mt-8 flex max-w-sm flex-col gap-3 sm:flex-row sm:justify-center">
-            <Link className="cta-button w-full justify-center" to="/calendar">
-              Back to races
-            </Link>
-            <Link className="ghost-button w-full justify-center" to="/contact">
-              Contact organizers
-            </Link>
-          </div>
-        </div>
-      </section>
-    );
+    return <ErrorSection />;
   }
 
   return (
@@ -669,3 +554,46 @@ export function RaceRegistrationPage() {
     </section>
   );
 }
+
+const Loader = () => (
+  <section className="page-shell">
+    <div className="surface-panel p-6 sm:p-8">
+      <div className="h-4 w-40 animate-pulse rounded bg-white/10" />
+      <div className="mt-4 h-11 w-full max-w-3xl animate-pulse rounded bg-white/10" />
+      <div className="mt-5 h-5 w-full max-w-2xl animate-pulse rounded bg-white/8" />
+    </div>
+    <div className="surface-panel p-6 sm:p-8">
+      <div className="grid gap-4 md:grid-cols-2">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <div
+            key={index}
+            className="h-20 animate-pulse rounded-3xl bg-white/6"
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+const ErrorSection = () => (
+  <section className="page-shell">
+    <div className="surface-panel p-8 text-center sm:p-10">
+      <span className="eyebrow">Registration</span>
+      <h1 className="mt-5 font-heading text-4xl font-semibold text-(--text-primary-dark) sm:text-5xl">
+        Race not found.
+      </h1>
+      <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-(--text-secondary-dark)">
+        We could not load this registration form. The race may be unpublished or
+        the link is incorrect.
+      </p>
+      <div className="mx-auto mt-8 flex max-w-sm flex-col gap-3 sm:flex-row sm:justify-center">
+        <Link className="cta-button w-full justify-center" to="/calendar">
+          Back to races
+        </Link>
+        <Link className="ghost-button w-full justify-center" to="/contact">
+          Contact organizers
+        </Link>
+      </div>
+    </div>
+  </section>
+);
