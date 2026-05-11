@@ -232,7 +232,7 @@ export function RaceRegistrationPage() {
           noValidate
           onSubmit={handleSubmit}
         >
-          <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-5">
+          <div className="flex items-center justify-between gap-4 border-b border-(--border-dark) pb-5">
             <div>
               <h2 className="font-heading text-2xl font-semibold text-(--text-primary-dark)">
                 Online registration for {race.name}
@@ -253,7 +253,7 @@ export function RaceRegistrationPage() {
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
               <span>First name *</span>
               <input
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
+                className="rounded-2xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
                 name="firstName"
                 onChange={event =>
                   handleFieldChange('firstName', event.target.value)
@@ -272,7 +272,7 @@ export function RaceRegistrationPage() {
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
               <span>Last name *</span>
               <input
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
+                className="rounded-2xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
                 name="lastName"
                 onChange={event =>
                   handleFieldChange('lastName', event.target.value)
@@ -291,7 +291,7 @@ export function RaceRegistrationPage() {
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
               <span>Birth date *</span>
               <input
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+                className="rounded-2xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
                 name="birthDate"
                 onChange={event =>
                   handleFieldChange('birthDate', event.target.value)
@@ -309,7 +309,7 @@ export function RaceRegistrationPage() {
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
               <span>Gender *</span>
               <select
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+                className="rounded-2xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
                 name="gender"
                 onChange={event =>
                   handleFieldChange('gender', event.target.value)
@@ -333,7 +333,7 @@ export function RaceRegistrationPage() {
             <label className="grid gap-2 text-sm text-(--text-secondary-dark) md:col-span-2">
               <span>Club / Team</span>
               <input
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
+                className="rounded-2xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
                 name="clubTeam"
                 onChange={event =>
                   handleFieldChange('clubTeam', event.target.value)
@@ -347,7 +347,7 @@ export function RaceRegistrationPage() {
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
               <span>Nation *</span>
               <input
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
+                className="rounded-2xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
                 name="nation"
                 onChange={event =>
                   handleFieldChange('nation', event.target.value)
@@ -366,7 +366,7 @@ export function RaceRegistrationPage() {
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
               <span>Starting class *</span>
               <select
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary) disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-2xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary) disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={sortedSubRaces.length === 0}
                 name="startingClass"
                 onChange={event =>
@@ -394,7 +394,7 @@ export function RaceRegistrationPage() {
               <label className="grid gap-2 text-sm text-(--text-secondary-dark) md:col-span-2">
                 <span>UCI License Number *</span>
                 <input
-                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
+                  className="rounded-2xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
                   name="uciLicenseNumber"
                   onChange={event =>
                     handleFieldChange('uciLicenseNumber', event.target.value)
@@ -415,7 +415,7 @@ export function RaceRegistrationPage() {
               <span>Email *</span>
               <input
                 autoComplete="email"
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
+                className="rounded-2xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
                 name="email"
                 onChange={event =>
                   handleFieldChange('email', event.target.value)
@@ -432,7 +432,7 @@ export function RaceRegistrationPage() {
             </label>
           </div>
 
-          <div className="mt-8 rounded-3xl border border-white/10 bg-white/4 p-5">
+          <div className="mt-8 rounded-3xl border border-(--border-dark) bg-(--surface-soft) p-5">
             <h3 className="font-heading text-xl font-semibold text-(--text-primary-dark)">
               Privacy Policy & Disclaimer
             </h3>
@@ -443,7 +443,7 @@ export function RaceRegistrationPage() {
             <label className="mt-4 flex items-start gap-3 text-sm leading-6 text-(--text-secondary-dark)">
               <input
                 checked={formState.privacyAccepted}
-                className="mt-1 h-4 w-4 rounded border border-white/10 bg-white/5"
+                className="mt-1 h-4 w-4 rounded border border-(--border-dark) bg-(--surface-soft)"
                 name="privacyAccepted"
                 onChange={event =>
                   handleFieldChange('privacyAccepted', event.target.checked)
@@ -469,7 +469,7 @@ export function RaceRegistrationPage() {
           </div>
 
           {activePriceCents !== null ? (
-            <div className="mt-6 rounded-2xl border border-white/10 bg-white/4 px-4 py-3 text-sm text-(--text-secondary-dark)">
+            <div className="mt-6 rounded-2xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-sm text-(--text-secondary-dark)">
               Registration fee:{' '}
               <span className="font-semibold text-(--text-primary-dark)">
                 €{(activePriceCents / 100).toFixed(2)}

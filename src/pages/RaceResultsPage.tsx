@@ -243,7 +243,7 @@ export function RaceResultsPage() {
 
         return (
           <div key={subRace.id} className="surface-panel p-6 sm:p-8">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-(--border-dark) pb-4">
               <h2 className="font-heading text-2xl font-semibold text-(--text-primary-dark)">
                 {resolveRaceCategoryLabel(subRace.name, raceCategoryLabels)}
               </h2>
@@ -258,7 +258,7 @@ export function RaceResultsPage() {
               <div className="mt-4 overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b border-white/10 text-(--text-secondary-dark)">
+                    <tr className="border-b border-(--border-dark) text-(--text-secondary-dark)">
                       <th className="px-2 py-2 font-medium">Name</th>
                       <th className="px-2 py-2 font-medium">Bib</th>
                       <th className="px-2 py-2 font-medium">Pos</th>
@@ -270,20 +270,20 @@ export function RaceResultsPage() {
                     {(subRace.entries ?? []).map(entry => {
                       const edit = edits[entry.id] ?? { bibNumber: '', position: '', timeText: '', status: '' };
                       return (
-                        <tr key={entry.id} className="border-b border-white/5 last:border-0">
+                        <tr key={entry.id} className="border-b border-(--border-dark)/50 last:border-0">
                           <td className="px-2 py-2 text-(--text-primary-dark)">
                             {entry.participant?.fullName ?? '—'}
                           </td>
                           <td className="px-2 py-2">
                             <input
-                              className="w-20 rounded-lg border border-white/15 bg-white/5 px-2 py-1.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
+                              className="w-20 rounded-lg border border-(--border-dark) bg-(--surface-soft) px-2 py-1.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
                               onChange={e => updateEdit(entry.id, 'bibNumber', e.target.value)}
                               value={edit.bibNumber}
                             />
                           </td>
                           <td className="px-2 py-2">
                             <input
-                              className="w-16 rounded-lg border border-white/15 bg-white/5 px-2 py-1.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
+                              className="w-16 rounded-lg border border-(--border-dark) bg-(--surface-soft) px-2 py-1.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
                               onChange={e => updateEdit(entry.id, 'position', e.target.value)}
                               type="number"
                               value={edit.position}
@@ -291,7 +291,7 @@ export function RaceResultsPage() {
                           </td>
                           <td className="px-2 py-2">
                             <input
-                              className="w-28 rounded-lg border border-white/15 bg-white/5 px-2 py-1.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
+                              className="w-28 rounded-lg border border-(--border-dark) bg-(--surface-soft) px-2 py-1.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
                               onChange={e => updateEdit(entry.id, 'timeText', e.target.value)}
                               placeholder="00:42:13"
                               value={edit.timeText}
@@ -299,7 +299,7 @@ export function RaceResultsPage() {
                           </td>
                           <td className="px-2 py-2">
                             <select
-                              className="rounded-lg border border-white/15 bg-white/5 px-2 py-1.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
+                              className="rounded-lg border border-(--border-dark) bg-(--surface-soft) px-2 py-1.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
                               onChange={e => updateEdit(entry.id, 'status', e.target.value)}
                               value={edit.status}
                             >
@@ -328,33 +328,33 @@ export function RaceResultsPage() {
                   + Add participant manually
                 </button>
               ) : (
-                <div className="rounded-2xl border border-white/10 bg-white/4 p-4 sm:p-5">
+                <div className="rounded-2xl border border-(--border-dark) bg-(--surface-soft) p-4 sm:p-5">
                   <h3 className="font-heading text-lg font-semibold text-(--text-primary-dark)">
                     New participant
                   </h3>
                   <div className="mt-3 grid gap-3 md:grid-cols-2">
                     <input
-                      className="rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
+                      className="rounded-xl border border-(--border-dark) bg-(--surface-soft) px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
                       onChange={e => updateDraft(subRace.id, 'fullName', e.target.value)}
                       placeholder="Full name *"
                       value={draft.fullName}
                     />
                     <input
-                      className="rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
+                      className="rounded-xl border border-(--border-dark) bg-(--surface-soft) px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
                       onChange={e => updateDraft(subRace.id, 'email', e.target.value)}
                       placeholder="Email"
                       type="email"
                       value={draft.email}
                     />
                     <input
-                      className="rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
+                      className="rounded-xl border border-(--border-dark) bg-(--surface-soft) px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
                       onChange={e => updateDraft(subRace.id, 'dateOfBirth', e.target.value)}
                       placeholder="Date of birth"
                       type="date"
                       value={draft.dateOfBirth}
                     />
                     <select
-                      className="rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
+                      className="rounded-xl border border-(--border-dark) bg-(--surface-soft) px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
                       onChange={e => updateDraft(subRace.id, 'gender', e.target.value)}
                       value={draft.gender}
                     >
@@ -364,13 +364,13 @@ export function RaceResultsPage() {
                       <option value="other">Other</option>
                     </select>
                     <input
-                      className="rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
+                      className="rounded-xl border border-(--border-dark) bg-(--surface-soft) px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
                       onChange={e => updateDraft(subRace.id, 'teamName', e.target.value)}
                       placeholder="Team / Club"
                       value={draft.teamName}
                     />
                     <input
-                      className="rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
+                      className="rounded-xl border border-(--border-dark) bg-(--surface-soft) px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
                       onChange={e => updateDraft(subRace.id, 'nationality', e.target.value)}
                       placeholder="Nation"
                       value={draft.nationality}
@@ -382,26 +382,26 @@ export function RaceResultsPage() {
                   </h4>
                   <div className="mt-2 grid gap-3 md:grid-cols-4">
                     <input
-                      className="rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
+                      className="rounded-xl border border-(--border-dark) bg-(--surface-soft) px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
                       onChange={e => updateDraft(subRace.id, 'bibNumber', e.target.value)}
                       placeholder="Bib"
                       value={draft.bibNumber}
                     />
                     <input
-                      className="rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
+                      className="rounded-xl border border-(--border-dark) bg-(--surface-soft) px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
                       onChange={e => updateDraft(subRace.id, 'position', e.target.value)}
                       placeholder="Position"
                       type="number"
                       value={draft.position}
                     />
                     <input
-                      className="rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
+                      className="rounded-xl border border-(--border-dark) bg-(--surface-soft) px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
                       onChange={e => updateDraft(subRace.id, 'timeText', e.target.value)}
                       placeholder="Time (00:42:13)"
                       value={draft.timeText}
                     />
                     <select
-                      className="rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
+                      className="rounded-xl border border-(--border-dark) bg-(--surface-soft) px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
                       onChange={e => updateDraft(subRace.id, 'status', e.target.value)}
                       value={draft.status}
                     >

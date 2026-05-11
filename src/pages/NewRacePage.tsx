@@ -296,7 +296,7 @@ export function NewRacePage() {
           <label className="block text-sm text-(--text-secondary-dark)">
             Race name *
             <input
-              className="mt-2 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+              className="mt-2 w-full rounded-xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
               onChange={event => setField('name', event.target.value)}
               required
               type="text"
@@ -310,7 +310,7 @@ export function NewRacePage() {
           <label className="block text-sm text-(--text-secondary-dark)">
             Race date *
             <input
-              className="mt-2 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+              className="mt-2 w-full rounded-xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
               onChange={event => setField('raceDate', event.target.value)}
               required
               type="date"
@@ -324,7 +324,7 @@ export function NewRacePage() {
           <label className="block text-sm text-(--text-secondary-dark)">
             Type *
             <input
-              className="mt-2 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+              className="mt-2 w-full rounded-xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
               onChange={event => setField('type', event.target.value)}
               required
               type="text"
@@ -338,7 +338,7 @@ export function NewRacePage() {
           <label className="block text-sm text-(--text-secondary-dark)">
             Location *
             <input
-              className="mt-2 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+              className="mt-2 w-full rounded-xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
               onChange={event => setField('location', event.target.value)}
               required
               type="text"
@@ -352,13 +352,13 @@ export function NewRacePage() {
           <label className="block text-sm text-(--text-secondary-dark) md:col-span-2">
             Description
             <textarea
-              className="mt-2 min-h-28 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+              className="mt-2 min-h-28 w-full rounded-xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
               onChange={event => setField('description', event.target.value)}
               value={formState.description}
             />
           </label>
 
-          <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-(--text-secondary-dark) md:col-span-2">
+          <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-sm text-(--text-secondary-dark) md:col-span-2">
             <input
               checked={formState.internalRegistration}
               className="h-4 w-4 rounded"
@@ -371,7 +371,7 @@ export function NewRacePage() {
           <label className="block text-sm text-(--text-secondary-dark)">
             External registration URL
             <input
-              className="mt-2 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+              className="mt-2 w-full rounded-xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
               onChange={event =>
                 setField('externalRegistrationUrl', event.target.value)
               }
@@ -389,7 +389,7 @@ export function NewRacePage() {
           <label className="block text-sm text-(--text-secondary-dark)">
             External results URL
             <input
-              className="mt-2 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+              className="mt-2 w-full rounded-xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
               onChange={event =>
                 setField('externalResultsUrl', event.target.value)
               }
@@ -405,7 +405,7 @@ export function NewRacePage() {
           </label>
         </div>
 
-        <section className="space-y-3 rounded-2xl border border-white/10 bg-white/4 p-4 sm:p-5">
+        <section className="space-y-3 rounded-2xl border border-(--border-dark) bg-(--surface-soft) p-4 sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <h2 className="font-heading text-xl font-semibold text-(--text-primary-dark)">
               Categories (race_sub_races)
@@ -426,7 +426,7 @@ export function NewRacePage() {
                   {index + 1}.
                 </span>
                 <select
-                  className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+                  className="w-full rounded-xl border border-(--border-dark) bg-(--surface-soft) px-4 py-2.5 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
                   disabled={isRaceCategoriesLoading || isRaceCategoriesError}
                   onChange={event =>
                     updateCategory(category.id, event.target.value)
@@ -447,7 +447,7 @@ export function NewRacePage() {
                 <div className="relative w-32 shrink-0">
                   <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-(--text-secondary-dark)">€</span>
                   <input
-                    className="w-full rounded-xl border border-white/15 bg-white/5 py-2.5 pl-7 pr-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+                    className="w-full rounded-xl border border-(--border-dark) bg-(--surface-soft) py-2.5 pl-7 pr-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
                     min="0"
                     onChange={event =>
                       setCategories(current =>
