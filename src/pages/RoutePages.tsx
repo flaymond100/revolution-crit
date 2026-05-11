@@ -244,7 +244,8 @@ export function RaceDetailPage() {
     const entries = selectedSubRace?.entries ?? [];
     const sorted = [...entries].sort((a, b) => {
       // Finished entries with positions first, sorted by position; then everything else
-      if (a.position !== null && b.position !== null) return a.position - b.position;
+      if (a.position !== null && b.position !== null)
+        return a.position - b.position;
       if (a.position !== null) return -1;
       if (b.position !== null) return 1;
       return 0;
@@ -253,10 +254,12 @@ export function RaceDetailPage() {
   }, [selectedSubRace]);
 
   const hasResults = useMemo(
-    () => visibleEntries.some(e => e.position !== null || e.timeText || e.status),
+    () =>
+      visibleEntries.some(e => e.position !== null || e.timeText || e.status),
     [visibleEntries]
   );
 
+  console.log('visibleEntries', visibleEntries);
   const formattedDate = useMemo(() => {
     if (!race?.raceDate) {
       return 'TBA';
@@ -555,7 +558,10 @@ export function RaceDetailPage() {
               <h2 className="mt-3 font-heading text-2xl font-semibold text-(--text-primary-dark) sm:text-3xl">
                 Registered for{' '}
                 {selectedSubRace
-                  ? resolveRaceCategoryLabel(selectedSubRace.name, raceCategoryLabels)
+                  ? resolveRaceCategoryLabel(
+                      selectedSubRace.name,
+                      raceCategoryLabels
+                    )
                   : '—'}
               </h2>
               <p className="mt-2 text-sm text-(--text-secondary-dark)">
@@ -589,15 +595,6 @@ export function RaceDetailPage() {
                     <th className="px-3 py-3 font-medium">#</th>
                     <th className="px-3 py-3 font-medium">Name</th>
                     <th className="px-3 py-3 font-medium">Team</th>
-                    <th className="px-3 py-3 font-medium">Nation</th>
-                    <th className="px-3 py-3 font-medium">Bib</th>
-                    {hasResults ? (
-                      <>
-                        <th className="px-3 py-3 font-medium">Pos</th>
-                        <th className="px-3 py-3 font-medium">Time</th>
-                        <th className="px-3 py-3 font-medium">Status</th>
-                      </>
-                    ) : null}
                   </tr>
                 </thead>
                 <tbody>
@@ -615,25 +612,6 @@ export function RaceDetailPage() {
                       <td className="px-3 py-3 text-(--text-secondary-dark)">
                         {entry.participant?.teamName ?? '—'}
                       </td>
-                      <td className="px-3 py-3 text-(--text-secondary-dark)">
-                        {entry.participant?.nationality ?? '—'}
-                      </td>
-                      <td className="px-3 py-3 text-(--text-secondary-dark)">
-                        {entry.bibNumber ?? '—'}
-                      </td>
-                      {hasResults ? (
-                        <>
-                          <td className="px-3 py-3 text-(--text-primary-dark)">
-                            {entry.position ?? '—'}
-                          </td>
-                          <td className="px-3 py-3 text-(--text-secondary-dark)">
-                            {entry.timeText ?? '—'}
-                          </td>
-                          <td className="px-3 py-3 text-(--text-secondary-dark) uppercase">
-                            {entry.status ?? '—'}
-                          </td>
-                        </>
-                      ) : null}
                     </tr>
                   ))}
                 </tbody>

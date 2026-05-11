@@ -6,10 +6,10 @@ export type CreatePaymentCheckoutPayload = {
   participant: {
     fullName: string;
     email: string;
-    birthDate: string;
+    dateOfBirth: string;
     gender: string;
-    clubTeam: string;
-    nation: string;
+    teamName: string;
+    nationality: string;
     uciLicenseNumber?: string;
   };
   successUrl: string;

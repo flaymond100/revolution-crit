@@ -182,10 +182,10 @@ export function RaceRegistrationPage() {
         participant: {
           fullName: `${formState.firstName} ${formState.lastName}`.trim(),
           email: formState.email,
-          birthDate: formState.birthDate,
+          dateOfBirth: formState.birthDate,
           gender: formState.gender,
-          clubTeam: formState.clubTeam,
-          nation: formState.nation,
+          teamName: formState.clubTeam,
+          nationality: formState.nation,
           uciLicenseNumber: formState.uciLicenseNumber || undefined,
         },
         successUrl: `${baseUrl}${basePath}/registration-success`,
