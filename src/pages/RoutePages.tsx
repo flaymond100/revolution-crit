@@ -259,7 +259,6 @@ export function RaceDetailPage() {
     [visibleEntries]
   );
 
-  console.log('visibleEntries', visibleEntries);
   const formattedDate = useMemo(() => {
     if (!race?.raceDate) {
       return 'TBA';
