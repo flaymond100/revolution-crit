@@ -30,12 +30,26 @@ export function HomePage() {
     createRaceCategoryLabelMap(raceCategories)
   );
 
-  const promotedRaceDate = races[0]
+  const upcomingRace = (raceCalendar ?? [])
+    .filter(r => {
+      const d = new Date(r.raceDate);
+      if (Number.isNaN(d.getTime())) return false;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return d >= today;
+    })
+    .sort((a, b) => new Date(a.raceDate).getTime() - new Date(b.raceDate).getTime())[0];
+
+  const upcomingRaceCity = upcomingRace
+    ? upcomingRace.location.split(',')[0]?.trim() || upcomingRace.location
+    : null;
+
+  const promotedRaceDate = upcomingRace
     ? new Intl.DateTimeFormat('en-GB', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
-      }).format(new Date(races[0].date))
+      }).format(new Date(upcomingRace.raceDate))
     : 'Date TBA';
 
   return (
@@ -99,31 +113,40 @@ export function HomePage() {
                 Upcoming Highlight
               </p>
               <h2 className="mt-3 font-heading text-2xl font-semibold text-(--text-primary-dark)">
-                {races[0]?.title ?? 'Featured race'}
+                {upcomingRace?.name ?? 'No upcoming races'}
               </h2>
               <p className="mt-3 text-sm leading-6 text-(--text-secondary-dark)">
-                {races[0]
-                  ? `Highlighted event in ${races[0].city}. Explore category blocks and participant data from the race detail page.`
-                  : 'Promotion race is loading. Check back in a moment for latest event details.'}
+                {upcomingRace
+                  ? `Highlighted event in ${upcomingRaceCity}. Explore category blocks and participant data from the race detail page.`
+                  : 'New races will be announced here when scheduled.'}
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <span className="filter-chip">{promotedRaceDate}</span>
                 <span className="filter-chip">
-                  {races[0]?.city ?? 'Location TBA'}
+                  {upcomingRaceCity ?? 'Location TBA'}
                 </span>
               </div>
 
-              {races[0]?.externalRegistrationUrl && (
+              {upcomingRace && (upcomingRace.internalRegistration || upcomingRace.externalRegistrationUrl) ? (
                 <div className="mt-5">
-                  <Link
-                    className="cta-button w-full justify-center"
-                    target="_blank"
-                    to={races[0]?.externalRegistrationUrl ?? '/calendar'}
-                  >
-                    Register Now
-                  </Link>
+                  {upcomingRace.internalRegistration ? (
+                    <Link
+                      className="cta-button w-full justify-center"
+                      to={`/calendar/${upcomingRace.id}/register`}
+                    >
+                      Register Now
+                    </Link>
+                  ) : (
+                    <Link
+                      className="cta-button w-full justify-center"
+                      target="_blank"
+                      to={upcomingRace.externalRegistrationUrl ?? '/calendar'}
+                    >
+                      Register Now
+                    </Link>
+                  )}
                 </div>
-              )}
+              ) : null}
             </div>
 
             {/* <div className="grid gap-4 sm:grid-cols-2">

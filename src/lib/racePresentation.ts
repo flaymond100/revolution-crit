@@ -41,12 +41,12 @@ function parseCity(location: string): string {
 }
 
 export function registrationStatus(race: RaceCalendar): RaceRegistrationStatus {
-  if (!race.externalRegistrationUrl) {
+  const raceDate = new Date(race.raceDate);
+  if (!Number.isNaN(raceDate.getTime()) && raceDate.getTime() < Date.now()) {
     return 'Registration Closed';
   }
 
-  const raceDate = new Date(race.raceDate);
-  if (!Number.isNaN(raceDate.getTime()) && raceDate.getTime() < Date.now()) {
+  if (!race.internalRegistration && !race.externalRegistrationUrl) {
     return 'Registration Closed';
   }
 

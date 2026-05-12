@@ -33,6 +33,14 @@ function parseCity(location: string): string {
   return city || location;
 }
 
+function isRacePast(race: RaceCalendar): boolean {
+  const raceDate = new Date(race.raceDate);
+  if (Number.isNaN(raceDate.getTime())) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return raceDate < today;
+}
+
 function formatRaceType(type: string): string {
   return type
     .split(/[-_\s]+/)
@@ -103,7 +111,14 @@ export function RaceTable({ races }: RaceTableProps) {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    {race.externalRegistrationUrl ? (
+                    {isRacePast(race) ? (
+                      <Link
+                        className="race-card-link"
+                        to={`/results/${new Date(race.raceDate).getFullYear()}/${race.id}`}
+                      >
+                        Results
+                      </Link>
+                    ) : race.internalRegistration || race.externalRegistrationUrl ? (
                       <Link
                         className="race-card-link"
                         to={`/calendar/${race.id}`}

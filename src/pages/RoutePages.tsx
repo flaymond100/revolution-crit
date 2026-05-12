@@ -10,7 +10,7 @@ import {
   fetchRaceCategories,
   resolveRaceCategoryLabel,
 } from '../lib/raceCategories';
-import { fetchRaceCalendars } from '../lib/raceCalendar';
+import { fetchRaceCalendarById, fetchRaceCalendars } from '../lib/raceCalendar';
 import { toRaceItems } from '../lib/racePresentation';
 import { supabase } from '../lib/supabase';
 import type { RaceCalendar } from '../types';
@@ -234,6 +234,15 @@ export function RaceDetailPage() {
     () => createRaceCategoryLabelMap(raceCategories),
     [raceCategories]
   );
+
+  const isPast = useMemo(() => {
+    if (!race?.raceDate) return false;
+    const raceDate = new Date(race.raceDate);
+    if (Number.isNaN(raceDate.getTime())) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return raceDate < today;
+  }, [race?.raceDate]);
 
   const selectedSubRace = useMemo(
     () => sortedSubRaces.find(s => s.id === selectedSubRaceId) ?? null,
@@ -489,7 +498,14 @@ export function RaceDetailPage() {
         ) : null}
 
         <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-          {race.internalRegistration ? (
+          {isPast ? (
+            <Link
+              className="cta-button w-full justify-center sm:w-auto"
+              to={`/results/${new Date(race.raceDate).getFullYear()}/${race.id}`}
+            >
+              Results
+            </Link>
+          ) : race.internalRegistration ? (
             <Link
               className="cta-button w-full justify-center sm:w-auto"
               to={`/calendar/${race.id}/register`}
@@ -550,8 +566,8 @@ export function RaceDetailPage() {
       </div>
 
       {sortedSubRaces.length > 0 ? (
-        <div className="surface-panel p-6 sm:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
+        <div id="results" className="surface-panel p-6 sm:p-8 scroll-mt-24">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-(--border-dark) pb-5">
             <div>
               <span className="eyebrow">Participants</span>
               <h2 className="mt-3 font-heading text-2xl font-semibold text-(--text-primary-dark) sm:text-3xl">
@@ -623,54 +639,334 @@ export function RaceDetailPage() {
   );
 }
 
+const AVAILABLE_SEASONS = [2026];
+
 export function ResultsPage() {
-  return (
-    <PlaceholderPage
-      ctaLabel=""
-      ctaTo="/results/2026"
-      description="Results will be posted once the first race is completed."
-      eyebrow="2026 results"
-      highlights={[]}
-      title="Results"
-    />
+  const navigate = useNavigate();
+  const [selectedSeason, setSelectedSeason] = useState<string>(
+    String(AVAILABLE_SEASONS[0])
   );
+
+  const handleGo = () => {
+    if (selectedSeason) navigate(`/results/${selectedSeason}`);
+  };
+
+  return (
+    <section className="page-shell">
+      <div className="surface-panel p-6 sm:p-8">
+        <span className="eyebrow">Results</span>
+        <h1 className="mt-3 font-heading text-3xl font-semibold text-(--text-primary-dark) sm:text-4xl">
+          Past races
+        </h1>
+        <p className="mt-2 text-sm text-(--text-secondary-dark)">
+          Pick a season to see all past races and their results.
+        </p>
+
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <label className="text-sm text-(--text-secondary-dark)">Season</label>
+          <select
+            className="rounded-xl border border-(--border-dark) bg-(--surface-soft) px-4 py-2.5 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+            onChange={e => setSelectedSeason(e.target.value)}
+            value={selectedSeason}
+          >
+            {AVAILABLE_SEASONS.map(year => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+          <button className="cta-button px-5 py-2" onClick={handleGo} type="button">
+            View season
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function formatPastRaceDate(date: string): string {
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return date;
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(parsed);
 }
 
 export function ResultsSeasonPage() {
   const { season } = useParams();
+  const seasonYear = Number(season);
+
+  const { data: raceCalendar = [], isLoading } = useQuery({
+    queryKey: ['race-calendar'],
+    queryFn: fetchRaceCalendars,
+  });
+
+  const pastRaces = useMemo(() => {
+    if (!Number.isFinite(seasonYear)) return [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return raceCalendar
+      .filter(r => {
+        const d = new Date(r.raceDate);
+        if (Number.isNaN(d.getTime())) return false;
+        return d < today && d.getFullYear() === seasonYear;
+      })
+      .sort((a, b) => new Date(b.raceDate).getTime() - new Date(a.raceDate).getTime());
+  }, [raceCalendar, seasonYear]);
 
   return (
-    <PlaceholderPage
-      ctaLabel="Open season race result"
-      ctaTo={`/results/${season ?? '2026'}/berlin-night-circuit`}
-      description={`Season ${season ?? '2026'} is ready for race rows, leaderboard summaries, and category-specific result tables.`}
-      eyebrow="Season results"
-      highlights={[
-        `Season parameter: ${season ?? '2026'}`,
-        'Intended for overall standings, round summaries, and rider search.',
-        'Pairs cleanly with race-level result detail routes.',
-      ]}
-      title={`Results for ${season ?? '2026'}`}
-    />
+    <section className="page-shell">
+      <div className="surface-panel p-6 sm:p-8">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <span className="eyebrow">Season results</span>
+            <h1 className="mt-3 font-heading text-3xl font-semibold text-(--text-primary-dark) sm:text-4xl">
+              {seasonYear || 'Unknown season'}
+            </h1>
+            <p className="mt-2 text-sm text-(--text-secondary-dark)">
+              {pastRaces.length}{' '}
+              {pastRaces.length === 1 ? 'past race' : 'past races'} in this season.
+            </p>
+          </div>
+          <Link className="ghost-button" to="/results">
+            All seasons
+          </Link>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="surface-panel p-6 sm:p-8 text-(--text-secondary-dark)">
+          Loading races…
+        </div>
+      ) : pastRaces.length === 0 ? (
+        <div className="surface-panel p-6 sm:p-8 text-(--text-secondary-dark)">
+          No past races for {seasonYear}.
+        </div>
+      ) : (
+        <div className="surface-panel overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-3xl border-collapse">
+              <thead>
+                <tr className="border-b border-(--border-dark) text-left text-[0.68rem] uppercase tracking-[0.24em] text-(--text-secondary-dark)">
+                  <th className="px-6 py-4 font-semibold">Race</th>
+                  <th className="px-6 py-4 font-semibold">Date</th>
+                  <th className="px-6 py-4 font-semibold">Location</th>
+                  <th className="px-6 py-4 font-semibold" />
+                </tr>
+              </thead>
+              <tbody>
+                {pastRaces.map(race => (
+                  <tr
+                    key={race.id}
+                    className="border-b border-(--border-dark) text-sm text-(--text-secondary-dark)"
+                  >
+                    <td className="px-6 py-4 font-heading text-base font-semibold text-(--text-primary-dark)">
+                      {race.name || 'Untitled race'}
+                    </td>
+                    <td className="px-6 py-4 text-(--text-primary-dark)">
+                      {formatPastRaceDate(race.raceDate)}
+                    </td>
+                    <td className="px-6 py-4">{race.location}</td>
+                    <td className="px-6 py-4 text-right">
+                      <Link
+                        className="cta-button px-4 py-2"
+                        to={`/results/${seasonYear}/${race.id}`}
+                      >
+                        View results
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
 
 export function ResultsRacePage() {
   const { raceSlug, season } = useParams();
+  const [selectedSubRaceId, setSelectedSubRaceId] = useState<string>('');
+
+  const { data: race, isLoading } = useQuery({
+    queryKey: ['race-results-page', raceSlug],
+    queryFn: () => fetchRaceCalendarById(raceSlug ?? ''),
+    enabled: Boolean(raceSlug),
+  });
+
+  const { data: raceCategories = [] } = useQuery({
+    queryKey: ['race-categories'],
+    queryFn: fetchRaceCategories,
+  });
+
+  const raceCategoryLabels = useMemo(
+    () => createRaceCategoryLabelMap(raceCategories),
+    [raceCategories]
+  );
+
+  const sortedSubRaces = useMemo(() => {
+    if (!race?.subRaces) return [];
+    return [...race.subRaces].sort(
+      (a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999)
+    );
+  }, [race]);
+
+  useEffect(() => {
+    if (sortedSubRaces.length === 0) {
+      setSelectedSubRaceId('');
+      return;
+    }
+    if (
+      !selectedSubRaceId ||
+      !sortedSubRaces.some(s => s.id === selectedSubRaceId)
+    ) {
+      setSelectedSubRaceId(sortedSubRaces[0].id);
+    }
+  }, [selectedSubRaceId, sortedSubRaces]);
+
+  const selectedSubRace = useMemo(
+    () => sortedSubRaces.find(s => s.id === selectedSubRaceId) ?? null,
+    [sortedSubRaces, selectedSubRaceId]
+  );
+
+  const sortedEntries = useMemo(() => {
+    const entries = selectedSubRace?.entries ?? [];
+    return [...entries].sort((a, b) => {
+      if (a.position !== null && b.position !== null) return a.position - b.position;
+      if (a.position !== null) return -1;
+      if (b.position !== null) return 1;
+      return 0;
+    });
+  }, [selectedSubRace]);
+
+  const formattedDate = useMemo(() => {
+    if (!race?.raceDate) return 'TBA';
+    const parsed = new Date(race.raceDate);
+    if (Number.isNaN(parsed.getTime())) return race.raceDate;
+    return new Intl.DateTimeFormat('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(parsed);
+  }, [race?.raceDate]);
+
+  if (isLoading) {
+    return (
+      <section className="page-shell">
+        <div className="surface-panel p-6 sm:p-8 text-(--text-secondary-dark)">
+          Loading results…
+        </div>
+      </section>
+    );
+  }
+
+  if (!race) {
+    return (
+      <section className="page-shell">
+        <div className="surface-panel p-8 text-center sm:p-10">
+          <span className="eyebrow">Results</span>
+          <h1 className="mt-5 font-heading text-4xl font-semibold text-(--text-primary-dark) sm:text-5xl">
+            Race not found
+          </h1>
+          <Link className="cta-button mt-6 inline-flex" to={`/results/${season ?? ''}`}>
+            Back to season
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <PlaceholderPage
-      ctaLabel="Back to season"
-      ctaTo={`/results/${season ?? '2026'}`}
-      description="This route is reserved for race-specific standings, lap data, category tabs, and result export actions."
-      eyebrow="Race results"
-      highlights={[
-        `Season: ${season ?? '2026'}`,
-        `Race: ${raceSlug ?? 'berlin-night-circuit'}`,
-        'Table layout can evolve into live or official classifications without reworking navigation.',
-      ]}
-      title="Race result detail"
-    />
+    <section className="page-shell">
+      <div className="surface-panel p-6 sm:p-8">
+        <span className="eyebrow">Results</span>
+        <h1 className="mt-3 font-heading text-3xl font-semibold text-(--text-primary-dark) sm:text-4xl">
+          {race.name}
+        </h1>
+        <p className="mt-2 text-sm text-(--text-secondary-dark)">
+          {formattedDate} · {race.location}
+        </p>
+      </div>
+
+      {sortedSubRaces.length === 0 ? (
+        <div className="surface-panel p-6 sm:p-8 text-(--text-secondary-dark)">
+          No categories configured for this race.
+        </div>
+      ) : (
+        <div className="surface-panel p-6 sm:p-8">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-(--border-dark) pb-5">
+            <h2 className="font-heading text-2xl font-semibold text-(--text-primary-dark)">
+              {selectedSubRace
+                ? resolveRaceCategoryLabel(selectedSubRace.name, raceCategoryLabels)
+                : '—'}
+            </h2>
+            <select
+              className="rounded-xl border border-(--border-dark) bg-(--surface-soft) px-4 py-2.5 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
+              onChange={e => setSelectedSubRaceId(e.target.value)}
+              value={selectedSubRaceId}
+            >
+              {sortedSubRaces.map(subRace => (
+                <option key={subRace.id} value={subRace.id}>
+                  {resolveRaceCategoryLabel(subRace.name, raceCategoryLabels)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {sortedEntries.length === 0 ? (
+            <p className="mt-6 text-sm text-(--text-secondary-dark)">
+              No results posted for this category yet.
+            </p>
+          ) : (
+            <div className="mt-6 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-(--border-dark) text-(--text-secondary-dark)">
+                    <th className="px-3 py-3 font-medium">Pos</th>
+                    <th className="px-3 py-3 font-medium">Bib</th>
+                    <th className="px-3 py-3 font-medium">Name</th>
+                    <th className="px-3 py-3 font-medium">Team</th>
+                    <th className="px-3 py-3 font-medium">Time</th>
+                    <th className="px-3 py-3 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedEntries.map(entry => (
+                    <tr
+                      key={entry.id}
+                      className="border-b border-(--border-dark)/50 last:border-0"
+                    >
+                      <td className="px-3 py-3 text-(--text-primary-dark)">
+                        {entry.position ?? '—'}
+                      </td>
+                      <td className="px-3 py-3 text-(--text-secondary-dark)">
+                        {entry.bibNumber ?? '—'}
+                      </td>
+                      <td className="px-3 py-3 text-(--text-primary-dark)">
+                        {entry.participant?.fullName ?? '—'}
+                      </td>
+                      <td className="px-3 py-3 text-(--text-secondary-dark)">
+                        {entry.participant?.teamName ?? '—'}
+                      </td>
+                      <td className="px-3 py-3 text-(--text-secondary-dark)">
+                        {entry.timeText ?? '—'}
+                      </td>
+                      <td className="px-3 py-3 text-(--text-secondary-dark) uppercase">
+                        {entry.status ?? '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
   );
 }
 
