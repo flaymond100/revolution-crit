@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
 import {
   createRaceCategoryLabelMap,
@@ -136,6 +137,7 @@ export function RaceResultsPage() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['race-results', raceId] });
       await queryClient.invalidateQueries({ queryKey: ['race-calendar'] });
+      toast.success('Results saved');
     },
   });
 
@@ -180,11 +182,12 @@ export function RaceResultsPage() {
         });
         if (insertError) throw insertError;
       }
-      return subRaceId;
+      return { subRaceId, count: rows.length };
     },
-    onSuccess: async () => {
+    onSuccess: async ({ count }) => {
       await queryClient.invalidateQueries({ queryKey: ['race-results', raceId] });
       await queryClient.invalidateQueries({ queryKey: ['race-calendar'] });
+      toast.success(`${count} ${count === 1 ? 'rider' : 'riders'} imported`);
     },
   });
 
@@ -244,6 +247,7 @@ export function RaceResultsPage() {
       setDrafts(curr => ({ ...curr, [subRaceId]: null }));
       await queryClient.invalidateQueries({ queryKey: ['race-results', raceId] });
       await queryClient.invalidateQueries({ queryKey: ['race-calendar'] });
+      toast.success('Participant added');
     },
   });
 

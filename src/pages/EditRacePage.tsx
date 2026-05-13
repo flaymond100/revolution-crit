@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { fetchRaceCategories } from '../lib/raceCategories';
 import { fetchRaceCalendarById } from '../lib/raceCalendar';
 import { supabase } from '../lib/supabase';
@@ -339,6 +340,7 @@ export function EditRacePage() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['race-calendar'] });
       await queryClient.invalidateQueries({ queryKey: ['race-registration'] });
+      toast.success('Race updated');
       navigate(`/calendar/${raceId}`);
     },
   });
