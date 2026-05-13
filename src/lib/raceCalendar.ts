@@ -165,7 +165,7 @@ export async function fetchRaceCalendars(): Promise<RaceCalendar[]> {
     throw error;
   }
 
-  const rows = (data ?? []) as RaceCalendarWithRelations[];
+  const rows = (data ?? []) as unknown as RaceCalendarWithRelations[];
   return rows.map(mapRaceCalendar);
 }
 
@@ -186,5 +186,5 @@ export async function fetchRaceCalendarById(
     return null;
   }
 
-  return mapRaceCalendar(data as RaceCalendarWithRelations);
+  return mapRaceCalendar(data as unknown as RaceCalendarWithRelations);
 }
