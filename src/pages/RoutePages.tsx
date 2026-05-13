@@ -209,22 +209,6 @@ export function RaceDetailPage() {
     });
   }, [race]);
 
-  const [selectedSubRaceId, setSelectedSubRaceId] = useState<string>('');
-
-  useEffect(() => {
-    if (sortedSubRaces.length === 0) {
-      setSelectedSubRaceId('');
-      return;
-    }
-
-    if (
-      !selectedSubRaceId ||
-      !sortedSubRaces.some(subRace => subRace.id === selectedSubRaceId)
-    ) {
-      setSelectedSubRaceId(sortedSubRaces[0].id);
-    }
-  }, [selectedSubRaceId, sortedSubRaces]);
-
   const { data: raceCategories = [] } = useQuery({
     queryKey: ['race-categories'],
     queryFn: fetchRaceCategories,
@@ -244,29 +228,6 @@ export function RaceDetailPage() {
     return raceDate < today;
   }, [race?.raceDate]);
 
-  const selectedSubRace = useMemo(
-    () => sortedSubRaces.find(s => s.id === selectedSubRaceId) ?? null,
-    [sortedSubRaces, selectedSubRaceId]
-  );
-
-  const visibleEntries = useMemo(() => {
-    const entries = selectedSubRace?.entries ?? [];
-    const sorted = [...entries].sort((a, b) => {
-      // Finished entries with positions first, sorted by position; then everything else
-      if (a.position !== null && b.position !== null)
-        return a.position - b.position;
-      if (a.position !== null) return -1;
-      if (b.position !== null) return 1;
-      return 0;
-    });
-    return sorted;
-  }, [selectedSubRace]);
-
-  const hasResults = useMemo(
-    () =>
-      visibleEntries.some(e => e.position !== null || e.timeText || e.status),
-    [visibleEntries]
-  );
 
   const formattedDate = useMemo(() => {
     if (!race?.raceDate) {
@@ -565,74 +526,70 @@ export function RaceDetailPage() {
         ) : null}
       </div>
 
-      {sortedSubRaces.length > 0 ? (
+      {race.internalRegistration && sortedSubRaces.length > 0 ? (
         <div id="results" className="surface-panel p-6 sm:p-8 scroll-mt-24">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-(--border-dark) pb-5">
-            <div>
-              <span className="eyebrow">Participants</span>
-              <h2 className="mt-3 font-heading text-2xl font-semibold text-(--text-primary-dark) sm:text-3xl">
-                Registered for{' '}
-                {selectedSubRace
-                  ? resolveRaceCategoryLabel(
-                      selectedSubRace.name,
-                      raceCategoryLabels
-                    )
-                  : '—'}
-              </h2>
-              <p className="mt-2 text-sm text-(--text-secondary-dark)">
-                {visibleEntries.length}{' '}
-                {visibleEntries.length === 1 ? 'rider' : 'riders'}
-                {hasResults ? ' — results posted' : ' registered'}.
-              </p>
-            </div>
-            <select
-              className="rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
-              onChange={event => setSelectedSubRaceId(event.target.value)}
-              value={selectedSubRaceId}
-            >
-              {sortedSubRaces.map(subRace => (
-                <option key={subRace.id} value={subRace.id}>
-                  {resolveRaceCategoryLabel(subRace.name, raceCategoryLabels)}
-                </option>
-              ))}
-            </select>
-          </div>
+          <span className="eyebrow">Participants</span>
+          <h2 className="mt-3 font-heading text-2xl font-semibold text-(--text-primary-dark) sm:text-3xl">
+            Registered riders
+          </h2>
 
-          {visibleEntries.length === 0 ? (
-            <p className="mt-6 text-sm text-(--text-secondary-dark)">
-              No registered participants yet. Be the first to sign up.
-            </p>
-          ) : (
-            <div className="mt-6 overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-white/10 text-(--text-secondary-dark)">
-                    <th className="px-3 py-3 font-medium">#</th>
-                    <th className="px-3 py-3 font-medium">Name</th>
-                    <th className="px-3 py-3 font-medium">Team</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleEntries.map((entry, index) => (
-                    <tr
-                      key={entry.id}
-                      className="border-b border-white/5 last:border-0"
-                    >
-                      <td className="px-3 py-3 text-(--text-secondary-dark)">
-                        {index + 1}
-                      </td>
-                      <td className="px-3 py-3 text-(--text-primary-dark)">
-                        {entry.participant?.fullName ?? '—'}
-                      </td>
-                      <td className="px-3 py-3 text-(--text-secondary-dark)">
-                        {entry.participant?.teamName ?? '—'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <div className="mt-6 space-y-6">
+            {sortedSubRaces.map(subRace => {
+              const entries = subRace.entries ?? [];
+              return (
+                <div
+                  key={subRace.id}
+                  className="rounded-2xl border border-(--border-dark) bg-(--surface-soft) p-5"
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-3">
+                    <h3 className="font-heading text-lg font-semibold text-(--text-primary-dark)">
+                      {resolveRaceCategoryLabel(subRace.name, raceCategoryLabels)}
+                    </h3>
+                    <span className="text-xs text-(--text-secondary-dark)">
+                      {entries.length}{' '}
+                      {entries.length === 1 ? 'rider' : 'riders'}
+                    </span>
+                  </div>
+
+                  {entries.length === 0 ? (
+                    <p className="mt-4 text-sm text-(--text-secondary-dark)">
+                      No registered participants yet.
+                    </p>
+                  ) : (
+                    <div className="mt-4 overflow-x-auto">
+                      <table className="w-full text-left text-sm">
+                        <thead>
+                          <tr className="border-b border-(--border-dark) text-(--text-secondary-dark)">
+                            <th className="px-3 py-2 font-medium">#</th>
+                            <th className="px-3 py-2 font-medium">Name</th>
+                            <th className="px-3 py-2 font-medium">Team</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {entries.map((entry, index) => (
+                            <tr
+                              key={entry.id}
+                              className="border-b border-(--border-dark)/50 last:border-0"
+                            >
+                              <td className="px-3 py-2 text-(--text-secondary-dark)">
+                                {index + 1}
+                              </td>
+                              <td className="px-3 py-2 text-(--text-primary-dark)">
+                                {entry.participant?.fullName ?? '—'}
+                              </td>
+                              <td className="px-3 py-2 text-(--text-secondary-dark)">
+                                {entry.participant?.teamName ?? '—'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       ) : null}
     </section>
