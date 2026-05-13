@@ -52,6 +52,7 @@ export function mapRaceEntry(
     timeText: row.time_text,
     status: row.status,
     notes: row.notes,
+    fromResultsUpload: row.from_results_upload,
     participant: row.participants
       ? mapParticipant(row.participants)
       : undefined,
@@ -135,6 +136,7 @@ const raceCalendarSelect = `
       time_text,
       status,
       notes,
+      from_results_upload,
       created_at,
       updated_at,
       participants (

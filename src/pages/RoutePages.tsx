@@ -834,7 +834,7 @@ export function ResultsRacePage() {
   );
 
   const sortedEntries = useMemo(() => {
-    const entries = selectedSubRace?.entries ?? [];
+    const entries = (selectedSubRace?.entries ?? []).filter(e => e.fromResultsUpload);
     return [...entries].sort((a, b) => {
       if (a.position !== null && b.position !== null) return a.position - b.position;
       if (a.position !== null) return -1;
@@ -927,7 +927,6 @@ export function ResultsRacePage() {
                 <thead>
                   <tr className="border-b border-(--border-dark) text-(--text-secondary-dark)">
                     <th className="px-3 py-3 font-medium">Pos</th>
-                    <th className="px-3 py-3 font-medium">Bib</th>
                     <th className="px-3 py-3 font-medium">Name</th>
                     <th className="px-3 py-3 font-medium">Team</th>
                     <th className="px-3 py-3 font-medium">Time</th>
@@ -942,9 +941,6 @@ export function ResultsRacePage() {
                     >
                       <td className="px-3 py-3 text-(--text-primary-dark)">
                         {entry.position ?? '—'}
-                      </td>
-                      <td className="px-3 py-3 text-(--text-secondary-dark)">
-                        {entry.bibNumber ?? '—'}
                       </td>
                       <td className="px-3 py-3 text-(--text-primary-dark)">
                         {entry.participant?.fullName ?? '—'}

@@ -88,6 +88,7 @@ export interface RaceEntryRow {
   time_text: string | null;
   status: RaceEntryStatus;
   notes: string | null;
+  from_results_upload: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -118,6 +119,7 @@ export interface RaceEntry {
   timeText: string | null;
   status: RaceEntryStatus;
   notes: string | null;
+  fromResultsUpload: boolean;
   participant?: Participant;
   createdAt: string;
   updatedAt: string;
@@ -191,6 +193,7 @@ export interface RaceCalendarWithRelations {
       time_text: string | null;
       status: RaceEntryStatus;
       notes: string | null;
+      from_results_upload: boolean;
       created_at: string;
       updated_at: string;
       participants: {

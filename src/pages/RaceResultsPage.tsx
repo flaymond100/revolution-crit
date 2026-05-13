@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import * as XLSX from 'xlsx';
 import {
   createRaceCategoryLabelMap,
   fetchRaceCategories,
@@ -10,8 +11,15 @@ import { fetchRaceCalendarById } from '../lib/raceCalendar';
 import { findOrCreateParticipant } from '../lib/participants';
 import { supabase } from '../lib/supabase';
 
+type XlsxRow = {
+  position?: number | string;
+  firstName?: string;
+  lastName?: string;
+  team?: string;
+  time?: string;
+};
+
 type EntryEdit = {
-  bibNumber: string;
   position: string;
   timeText: string;
   status: string;
@@ -24,7 +32,6 @@ type NewEntryDraft = {
   gender: string;
   teamName: string;
   nationality: string;
-  bibNumber: string;
   position: string;
   timeText: string;
   status: string;
@@ -37,7 +44,6 @@ const emptyDraft: NewEntryDraft = {
   gender: '',
   teamName: '',
   nationality: '',
-  bibNumber: '',
   position: '',
   timeText: '',
   status: 'finished',
@@ -86,7 +92,6 @@ export function RaceResultsPage() {
     for (const subRace of race.subRaces ?? []) {
       for (const entry of subRace.entries ?? []) {
         initial[entry.id] = {
-          bibNumber: entry.bibNumber ?? '',
           position: entry.position?.toString() ?? '',
           timeText: entry.timeText ?? '',
           status: entry.status ?? '',
@@ -120,7 +125,6 @@ export function RaceResultsPage() {
         const { error } = await supabase
           .from('race_entries')
           .update({
-            bib_number: edit.bibNumber.trim() || null,
             position: Number.isFinite(positionNum) ? positionNum : null,
             time_text: edit.timeText.trim() || null,
             status: edit.status || null,
@@ -134,6 +138,77 @@ export function RaceResultsPage() {
       await queryClient.invalidateQueries({ queryKey: ['race-calendar'] });
     },
   });
+
+  const uploadResultsMutation = useMutation({
+    mutationFn: async ({ subRaceId, rows }: { subRaceId: string; rows: XlsxRow[] }) => {
+      // Wipe any previous upload for this sub-race
+      const { error: deleteError } = await supabase
+        .from('race_entries')
+        .delete()
+        .eq('sub_race_id', subRaceId)
+        .eq('from_results_upload', true);
+      if (deleteError) throw deleteError;
+
+      // Process each row: find/create participant, then insert entry
+      for (const row of rows) {
+        const firstName = String(row.firstName ?? '').trim();
+        const lastName = String(row.lastName ?? '').trim();
+        const fullName = `${firstName} ${lastName}`.trim();
+        if (!fullName) continue;
+
+        const participant = await findOrCreateParticipant({
+          fullName,
+          teamName: row.team ? String(row.team).trim() : undefined,
+        });
+
+        const rawPosition = row.position;
+        const positionNum =
+          typeof rawPosition === 'number'
+            ? rawPosition
+            : rawPosition && String(rawPosition).trim()
+              ? Number(String(rawPosition).trim())
+              : null;
+
+        const { error: insertError } = await supabase.from('race_entries').insert({
+          sub_race_id: subRaceId,
+          participant_id: participant.id,
+          is_paid: false,
+          from_results_upload: true,
+          position: Number.isFinite(positionNum) ? positionNum : null,
+          time_text: row.time ? String(row.time).trim() || null : null,
+          status: 'finished',
+        });
+        if (insertError) throw insertError;
+      }
+      return subRaceId;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['race-results', raceId] });
+      await queryClient.invalidateQueries({ queryKey: ['race-calendar'] });
+    },
+  });
+
+  const handleFileUpload = async (subRaceId: string, file: File) => {
+    setSubmitError(null);
+    try {
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      if (!sheet) throw new Error('Empty xlsx file');
+      const rows = XLSX.utils.sheet_to_json<XlsxRow>(sheet);
+      if (rows.length === 0) throw new Error('No rows found in the file');
+      const required = ['firstName', 'lastName'];
+      const missingHeaders = required.filter(k => !(k in rows[0]));
+      if (missingHeaders.length > 0) {
+        throw new Error(
+          `Missing required columns: ${missingHeaders.join(', ')}. Expected: position, firstName, lastName, team, time.`
+        );
+      }
+      await uploadResultsMutation.mutateAsync({ subRaceId, rows });
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Could not upload file.');
+    }
+  };
 
   const addEntryMutation = useMutation({
     mutationFn: async (subRaceId: string) => {
@@ -157,7 +232,6 @@ export function RaceResultsPage() {
         sub_race_id: subRaceId,
         participant_id: participant.id,
         is_paid: false,
-        bib_number: draft.bibNumber.trim() || null,
         position: Number.isFinite(positionNum) ? positionNum : null,
         time_text: draft.timeText.trim() || null,
         status: draft.status || null,
@@ -260,7 +334,6 @@ export function RaceResultsPage() {
                   <thead>
                     <tr className="border-b border-(--border-dark) text-(--text-secondary-dark)">
                       <th className="px-2 py-2 font-medium">Name</th>
-                      <th className="px-2 py-2 font-medium">Bib</th>
                       <th className="px-2 py-2 font-medium">Pos</th>
                       <th className="px-2 py-2 font-medium">Time</th>
                       <th className="px-2 py-2 font-medium">Status</th>
@@ -268,18 +341,11 @@ export function RaceResultsPage() {
                   </thead>
                   <tbody>
                     {(subRace.entries ?? []).map(entry => {
-                      const edit = edits[entry.id] ?? { bibNumber: '', position: '', timeText: '', status: '' };
+                      const edit = edits[entry.id] ?? { position: '', timeText: '', status: '' };
                       return (
                         <tr key={entry.id} className="border-b border-(--border-dark)/50 last:border-0">
                           <td className="px-2 py-2 text-(--text-primary-dark)">
                             {entry.participant?.fullName ?? '—'}
-                          </td>
-                          <td className="px-2 py-2">
-                            <input
-                              className="w-20 rounded-lg border border-(--border-dark) bg-(--surface-soft) px-2 py-1.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
-                              onChange={e => updateEdit(entry.id, 'bibNumber', e.target.value)}
-                              value={edit.bibNumber}
-                            />
                           </td>
                           <td className="px-2 py-2">
                             <input
@@ -318,15 +384,35 @@ export function RaceResultsPage() {
               </div>
             )}
 
-            <div className="mt-5">
+            <div className="mt-5 flex flex-wrap gap-3">
               {!draft ? (
-                <button
-                  className="ghost-button"
-                  onClick={() => setDrafts(curr => ({ ...curr, [subRace.id]: emptyDraft }))}
-                  type="button"
-                >
-                  + Add participant manually
-                </button>
+                <>
+                  <button
+                    className="ghost-button"
+                    onClick={() => setDrafts(curr => ({ ...curr, [subRace.id]: emptyDraft }))}
+                    type="button"
+                  >
+                    + Add participant manually
+                  </button>
+                  <label className="ghost-button cursor-pointer">
+                    {uploadResultsMutation.isPending && uploadResultsMutation.variables?.subRaceId === subRace.id
+                      ? 'Uploading…'
+                      : 'Upload XLSX results'}
+                    <input
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload(subRace.id, file);
+                        e.target.value = '';
+                      }}
+                      type="file"
+                    />
+                  </label>
+                  <span className="self-center text-xs text-(--text-secondary-dark)">
+                    {(subRace.entries ?? []).filter(e => e.fromResultsUpload).length} uploaded
+                  </span>
+                </>
               ) : (
                 <div className="rounded-2xl border border-(--border-dark) bg-(--surface-soft) p-4 sm:p-5">
                   <h3 className="font-heading text-lg font-semibold text-(--text-primary-dark)">
@@ -380,13 +466,7 @@ export function RaceResultsPage() {
                   <h4 className="mt-5 text-sm font-semibold uppercase tracking-wider text-(--text-secondary-dark)">
                     Result
                   </h4>
-                  <div className="mt-2 grid gap-3 md:grid-cols-4">
-                    <input
-                      className="rounded-xl border border-(--border-dark) bg-(--surface-soft) px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
-                      onChange={e => updateDraft(subRace.id, 'bibNumber', e.target.value)}
-                      placeholder="Bib"
-                      value={draft.bibNumber}
-                    />
+                  <div className="mt-2 grid gap-3 md:grid-cols-3">
                     <input
                       className="rounded-xl border border-(--border-dark) bg-(--surface-soft) px-3 py-2.5 text-(--text-primary-dark) outline-none focus:border-(--accent-secondary)"
                       onChange={e => updateDraft(subRace.id, 'position', e.target.value)}
