@@ -71,6 +71,7 @@ export interface ParticipantRow {
   nationality: string | null;
   email: string | null;
   phone: string | null;
+  uci_number: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -102,6 +103,7 @@ export interface Participant {
   nationality: string | null;
   email: string | null;
   phone: string | null;
+  uciNumber: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -205,6 +207,7 @@ export interface RaceCalendarWithRelations {
         nationality: string | null;
         email: string | null;
         phone: string | null;
+        uci_number: string | null;
         created_at: string;
         updated_at: string;
       } | null;

@@ -43,11 +43,13 @@ export function RaceRegistrationPage() {
       return [];
     }
 
-    return [...race.subRaces].sort((a, b) => {
-      const left = a.sortOrder ?? 999;
-      const right = b.sortOrder ?? 999;
-      return left - right;
-    });
+    return [...race.subRaces]
+      .filter(s => s.name !== 'frauen')
+      .sort((a, b) => {
+        const left = a.sortOrder ?? 999;
+        const right = b.sortOrder ?? 999;
+        return left - right;
+      });
   }, [race]);
 
   useEffect(() => {
@@ -92,50 +94,6 @@ export function RaceRegistrationPage() {
     activePriceCents === null ||
     paymentMutation.isPending;
 
-  const isEliteClassSelected = useMemo(() => {
-    const selectedSubRace = sortedSubRaces.find(
-      subRace => subRace.id === formState.startingClass
-    );
-
-    if (!selectedSubRace) {
-      return false;
-    }
-
-    return (
-      resolveRaceCategoryLabel(selectedSubRace.name, raceCategoryLabels)
-        .trim()
-        .toLowerCase() === 'elite'
-    );
-  }, [formState.startingClass, raceCategoryLabels, sortedSubRaces]);
-
-  useEffect(() => {
-    if (isEliteClassSelected) {
-      return;
-    }
-
-    setFormState(current => {
-      if (!current.uciLicenseNumber) {
-        return current;
-      }
-
-      return {
-        ...current,
-        uciLicenseNumber: '',
-      };
-    });
-
-    setErrors(current => {
-      if (!current.uciLicenseNumber) {
-        return current;
-      }
-
-      return {
-        ...current,
-        uciLicenseNumber: undefined,
-      };
-    });
-  }, [isEliteClassSelected]);
-
   const handleFieldChange = (
     field: keyof RegistrationFormState,
     value: string | boolean
@@ -160,7 +118,7 @@ export function RaceRegistrationPage() {
   const handleSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const nextErrors = validateForm(formState, isEliteClassSelected);
+    const nextErrors = validateForm(formState);
     setErrors(nextErrors);
     setSubmitError('');
 
@@ -186,7 +144,7 @@ export function RaceRegistrationPage() {
           gender: formState.gender,
           teamName: formState.clubTeam,
           nationality: formState.nation,
-          uciLicenseNumber: formState.uciLicenseNumber || undefined,
+          uciNumber: formState.uciLicenseNumber || undefined,
         },
         successUrl: `${baseUrl}${basePath}/registration-success`,
         cancelUrl: `${baseUrl}${basePath}/calendar/${race.id}/register?payment=cancelled`,
@@ -390,26 +348,19 @@ export function RaceRegistrationPage() {
               ) : null}
             </label>
 
-            {isEliteClassSelected ? (
-              <label className="grid gap-2 text-sm text-(--text-secondary-dark) md:col-span-2">
-                <span>UCI License Number *</span>
-                <input
-                  className="rounded-2xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
-                  name="uciLicenseNumber"
-                  onChange={event =>
-                    handleFieldChange('uciLicenseNumber', event.target.value)
-                  }
-                  placeholder="Enter your UCI license number"
-                  type="text"
-                  value={formState.uciLicenseNumber}
-                />
-                {errors.uciLicenseNumber ? (
-                  <span className="text-sm text-(--accent-cta)">
-                    {errors.uciLicenseNumber}
-                  </span>
-                ) : null}
-              </label>
-            ) : null}
+            <label className="grid gap-2 text-sm text-(--text-secondary-dark) md:col-span-2">
+              <span>UCI Number</span>
+              <input
+                className="rounded-2xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
+                name="uciLicenseNumber"
+                onChange={event =>
+                  handleFieldChange('uciLicenseNumber', event.target.value)
+                }
+                placeholder="Optional"
+                type="text"
+                value={formState.uciLicenseNumber}
+              />
+            </label>
 
             <label className="grid gap-2 text-sm text-(--text-secondary-dark) md:col-span-2">
               <span>Email *</span>

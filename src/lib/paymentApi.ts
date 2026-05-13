@@ -10,7 +10,7 @@ export type CreatePaymentCheckoutPayload = {
     gender: string;
     teamName: string;
     nationality: string;
-    uciLicenseNumber?: string;
+    uciNumber?: string;
   };
   successUrl: string;
   cancelUrl: string;

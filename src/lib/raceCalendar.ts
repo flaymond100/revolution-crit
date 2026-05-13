@@ -31,6 +31,7 @@ export function mapParticipant(row: ParticipantRow): Participant {
     nationality: row.nationality,
     email: row.email,
     phone: row.phone,
+    uciNumber: row.uci_number,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -148,6 +149,7 @@ const raceCalendarSelect = `
         nationality,
         email,
         phone,
+        uci_number,
         created_at,
         updated_at
       )

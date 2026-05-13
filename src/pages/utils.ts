@@ -35,8 +35,7 @@ export const genderOptions = [
 ];
 
 export function validateForm(
-  state: RegistrationFormState,
-  isEliteClassSelected: boolean
+  state: RegistrationFormState
 ): RegistrationFormErrors {
   const errors: RegistrationFormErrors = {};
 
@@ -62,10 +61,6 @@ export function validateForm(
 
   if (!state.startingClass) {
     errors.startingClass = 'Starting class is required.';
-  }
-
-  if (isEliteClassSelected && !state.uciLicenseNumber.trim()) {
-    errors.uciLicenseNumber = 'UCI license number is required for Elite class.';
   }
 
   if (!state.email.trim()) {

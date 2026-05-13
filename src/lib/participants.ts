@@ -8,6 +8,7 @@ export type ParticipantInput = {
   teamName?: string;
   nationality?: string;
   phone?: string;
+  uciNumber?: string;
 };
 
 /**
@@ -45,6 +46,7 @@ export async function findOrCreateParticipant(
       nationality: input.nationality || null,
       email,
       phone: input.phone || null,
+      uci_number: input.uciNumber?.trim() || null,
     })
     .select('id')
     .single();
