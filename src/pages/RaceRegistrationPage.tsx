@@ -146,7 +146,7 @@ export function RaceRegistrationPage() {
           nationality: formState.nation,
           uciNumber: formState.uciLicenseNumber || undefined,
         },
-        successUrl: `${baseUrl}${basePath}/registration-success`,
+        successUrl: `${baseUrl}${basePath}/registration-success?raceId=${race.id}`,
         cancelUrl: `${baseUrl}${basePath}/calendar/${race.id}/register?payment=cancelled`,
       });
 
