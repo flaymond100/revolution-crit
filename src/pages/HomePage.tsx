@@ -54,17 +54,17 @@ export function HomePage() {
 
   return (
     <>
-      <div className="w-full overflow-hidden" style={{ maxHeight: '38vh' }}>
+      <div className="h-[45vh] w-full overflow-hidden">
         <img
           src="/assets/header-image.jpeg"
           alt="Revolution Crit cyclists racing"
-          className="h-full w-full object-cover object-center"
+          className="h-full w-full object-cover object-[center_50%]"
         />
       </div>
 
     <div className="page-shell">
-      <section className="hero-grid home-hero-section overflow-hidden rounded-4xl border border-(--border-dark) px-6 py-8 sm:px-10 sm:py-12 lg:px-14 lg:py-16">
-        <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:gap-12">
+      <section className="hero-grid home-hero-section overflow-hidden rounded-4xl border border-(--border-dark) px-6 py-8 sm:px-10 sm:py-12 lg:px-7 lg:py-8">
+        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:gap-8">
           <div className="relative">
             <h1 className="mt-5 max-w-3xl font-heading text-4xl font-semibold leading-[1.02] text-(--text-primary-dark) sm:text-5xl lg:text-7xl">
               We want to
