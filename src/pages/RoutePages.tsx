@@ -15,6 +15,39 @@ import { toRaceItems } from '../lib/racePresentation';
 import { supabase } from '../lib/supabase';
 import type { RaceCalendar } from '../types';
 
+const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
+  finished: {
+    label: 'Finished',
+    className: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+  },
+  dns: {
+    label: 'DNS',
+    className: 'bg-red-500/15 text-red-400 border-red-500/30',
+  },
+  dnf: {
+    label: 'DNF',
+    className: 'bg-red-500/15 text-red-400 border-red-500/30',
+  },
+  dsq: {
+    label: 'DSQ',
+    className: 'bg-red-500/15 text-red-400 border-red-500/30',
+  },
+};
+
+function StatusBadge({ status }: { status: string | null }) {
+  const config = status ? STATUS_CONFIG[status] : null;
+
+  if (!config) {
+    return <span className="text-sm text-(--text-secondary-dark)">—</span>;
+  }
+
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${config.className}`}>
+      {config.label}
+    </span>
+  );
+}
+
 function sortRacesByDate(races: RaceCalendar[]): RaceCalendar[] {
   return [...races].sort((a, b) => {
     const dateA = new Date(a.raceDate).getTime();
@@ -908,8 +941,8 @@ export function ResultsRacePage() {
                       <td className="px-3 py-3 text-(--text-secondary-dark)">
                         {entry.timeText ?? '—'}
                       </td>
-                      <td className="px-3 py-3 text-(--text-secondary-dark) uppercase">
-                        {entry.status ?? '—'}
+                      <td className="px-3 py-3">
+                        <StatusBadge status={entry.status} />
                       </td>
                     </tr>
                   ))}

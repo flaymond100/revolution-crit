@@ -53,6 +53,15 @@ export function HomePage() {
     : 'Date TBA';
 
   return (
+    <>
+      <div className="w-full overflow-hidden" style={{ maxHeight: '38vh' }}>
+        <img
+          src="/assets/header-image.jpeg"
+          alt="Revolution Crit cyclists racing"
+          className="h-full w-full object-cover object-center"
+        />
+      </div>
+
     <div className="page-shell">
       <section className="hero-grid home-hero-section overflow-hidden rounded-4xl border border-(--border-dark) px-6 py-8 sm:px-10 sm:py-12 lg:px-14 lg:py-16">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:gap-12">
@@ -242,5 +251,6 @@ export function HomePage() {
         </div>
       </section> */}
     </div>
+    </>
   );
 }

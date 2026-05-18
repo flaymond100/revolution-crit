@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabase';
 const primaryLinks = [
   { label: 'Home', to: '/' },
   { label: 'Calendar', to: '/calendar' },
-  { label: 'Results', to: '/results' },
+  { label: 'Results', to: '/results/2026' },
   // { label: 'Categories', to: '/categories' },
   // { label: 'Gallery', to: '/gallery' },
   { label: 'About', to: '/about' },
