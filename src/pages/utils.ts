@@ -16,16 +16,16 @@ export type RegistrationFormErrors = Partial<
 >;
 
 export const initialFormState: RegistrationFormState = {
-  firstName: 'Kostas',
-  lastName: 'Testing',
-  birthDate: '2000-01-01',
-  gender: 'male',
-  clubTeam: 'Test',
-  nation: 'GER',
-  startingClass: 'Amateur',
+  firstName: '',
+  lastName: '',
+  birthDate: '',
+  gender: '',
+  clubTeam: '',
+  nation: '',
+  startingClass: '',
   uciLicenseNumber: '',
-  email: 'test@gmail.com',
-  privacyAccepted: true,
+  email: '',
+  privacyAccepted: false,
 };
 
 export const genderOptions = [
