@@ -21,7 +21,7 @@ export const initialFormState: RegistrationFormState = {
   birthDate: '',
   gender: '',
   clubTeam: '',
-  nation: '',
+  nation: 'GER',
   startingClass: '',
   uciLicenseNumber: '',
   email: '',

@@ -7,6 +7,7 @@ import {
   resolveRaceCategoryLabel,
 } from '../lib/raceCategories';
 import { fetchRaceCalendarById } from '../lib/raceCalendar';
+import { NATIONS } from '../lib/nations';
 import { createPaymentCheckout } from '../lib/paymentApi';
 import {
   genderOptions,
@@ -304,16 +305,20 @@ export function RaceRegistrationPage() {
 
             <label className="grid gap-2 text-sm text-(--text-secondary-dark)">
               <span>Nation *</span>
-              <input
-                className="rounded-2xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition placeholder:text-(--text-secondary-dark) focus:border-(--accent-secondary)"
+              <select
+                className="rounded-2xl border border-(--border-dark) bg-(--surface-soft) px-4 py-3 text-(--text-primary-dark) outline-none transition focus:border-(--accent-secondary)"
                 name="nation"
                 onChange={event =>
                   handleFieldChange('nation', event.target.value)
                 }
-                placeholder="Nation"
-                type="text"
                 value={formState.nation}
-              />
+              >
+                {NATIONS.map(option => (
+                  <option key={option.code} value={option.code}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
               {errors.nation ? (
                 <span className="text-sm text-(--accent-cta)">
                   {errors.nation}
@@ -405,6 +410,8 @@ export function RaceRegistrationPage() {
                 I agree to the{' '}
                 <Link
                   className="text-(--accent-secondary) underline decoration-transparent transition hover:decoration-current"
+                  rel="noreferrer"
+                  target="_blank"
                   to="/privacy"
                 >
                   privacy policy
