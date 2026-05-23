@@ -1,11 +1,14 @@
 {
-	"folders": [
-		{
-			"path": "../.."
-		},
-		{
-			"path": "../../../revolution-crit-be"
-		}
-	],
-	"settings": {}
+  "folders": [
+    {
+      "path": "../..",
+    },
+    {
+      "path": "../../../revolution-crit-be",
+    },
+    {
+      "path": "../../../schkeuditz-run",
+    },
+  ],
+  "settings": {},
 }
