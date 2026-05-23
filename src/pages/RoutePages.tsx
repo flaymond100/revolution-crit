@@ -15,6 +15,9 @@ import { toRaceItems } from '../lib/racePresentation';
 import { supabase } from '../lib/supabase';
 import type { RaceCalendar } from '../types';
 
+const EXCLUDED_RACE_ID = 'd1c51dd8-7981-4c32-a6b6-af7f36fe769e';
+const KARLIE_LAUF_RACE_ID = 'd1c51dd8-7981-4c32-a6b6-af7f36fe769e';
+
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   finished: {
     label: 'Finished',
@@ -119,9 +122,14 @@ export function RacesPage() {
     queryFn: fetchRaceCategories,
   });
 
-  const tableRaces = sortRacesByDate(data ?? []);
+  const visibleRaces = useMemo(
+    () => (data ?? []).filter(race => race.id !== EXCLUDED_RACE_ID),
+    [data]
+  );
+
+  const tableRaces = sortRacesByDate(visibleRaces);
   const races = toRaceItems(
-    data ?? [],
+    visibleRaces,
     createRaceCategoryLabelMap(raceCategories)
   );
 
@@ -214,21 +222,50 @@ export function RacesPage() {
   );
 }
 
-export function RaceDetailPage() {
+type RaceDetailPageProps = {
+  fixedRaceId?: string;
+  countLabelSingular?: string;
+  countLabelPlural?: string;
+  registeredLabel?: string;
+};
+
+export function RaceDetailPage({
+  fixedRaceId,
+  countLabelSingular = 'rider',
+  countLabelPlural = 'riders',
+  registeredLabel = 'Registered riders',
+}: RaceDetailPageProps = {}) {
   const navigate = useNavigate();
   const { slug } = useParams();
+  const raceId = fixedRaceId ?? slug;
   const [session, setSession] = useState<Session | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data: raceCalendarData = [], isLoading: isRaceCalendarLoading } = useQuery({
     queryKey: ['race-calendar'],
     queryFn: fetchRaceCalendars,
+    enabled: !fixedRaceId,
+  });
+
+  const {
+    data: fixedRace,
+    isLoading: isFixedRaceLoading,
+  } = useQuery({
+    queryKey: ['race-calendar-by-id', raceId],
+    queryFn: () => fetchRaceCalendarById(raceId ?? ''),
+    enabled: Boolean(fixedRaceId && raceId),
   });
 
   const race = useMemo(() => {
-    return data?.find(item => item.id === slug);
-  }, [data, slug]);
+    if (fixedRaceId) {
+      return fixedRace ?? undefined;
+    }
+
+    return raceCalendarData.find(item => item.id === raceId);
+  }, [fixedRace, fixedRaceId, raceCalendarData, raceId]);
+
+  const isLoading = fixedRaceId ? isFixedRaceLoading : isRaceCalendarLoading;
 
   const sortedSubRaces = useMemo(() => {
     if (!race?.subRaces) {
@@ -403,7 +440,7 @@ export function RaceDetailPage() {
             Race not found.
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-(--text-secondary-dark)">
-            We could not find a race for identifier {slug ?? 'unknown-race'}.
+            We could not find a race for identifier {raceId ?? 'unknown-race'}.
           </p>
           <div className="mx-auto mt-8 flex max-w-sm flex-col gap-3 sm:flex-row sm:justify-center">
             <Link className="cta-button w-full justify-center" to="/calendar">
@@ -563,7 +600,7 @@ export function RaceDetailPage() {
         <div id="results" className="surface-panel p-6 sm:p-8 scroll-mt-24">
           <span className="eyebrow">Participants</span>
           <h2 className="mt-3 font-heading text-2xl font-semibold text-(--text-primary-dark) sm:text-3xl">
-            Registered riders
+            {registeredLabel}
           </h2>
 
           <div className="mt-6 space-y-6">
@@ -580,7 +617,7 @@ export function RaceDetailPage() {
                     </h3>
                     <span className="text-xs text-(--text-secondary-dark)">
                       {entries.length}{' '}
-                      {entries.length === 1 ? 'rider' : 'riders'}
+                      {entries.length === 1 ? countLabelSingular : countLabelPlural}
                     </span>
                   </div>
 
@@ -626,6 +663,17 @@ export function RaceDetailPage() {
         </div>
       ) : null}
     </section>
+  );
+}
+
+export function KarlieLaufPage() {
+  return (
+    <RaceDetailPage
+      fixedRaceId={KARLIE_LAUF_RACE_ID}
+      countLabelSingular="participant"
+      countLabelPlural="participants"
+      registeredLabel="Registered participants"
+    />
   );
 }
 
@@ -699,6 +747,7 @@ export function ResultsSeasonPage() {
     today.setHours(0, 0, 0, 0);
     return raceCalendar
       .filter(r => {
+        if (r.id === EXCLUDED_RACE_ID) return false;
         const d = new Date(r.raceDate);
         if (Number.isNaN(d.getTime())) return false;
         return d < today && d.getFullYear() === seasonYear;

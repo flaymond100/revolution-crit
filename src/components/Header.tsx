@@ -7,6 +7,10 @@ import { supabase } from '../lib/supabase';
 const primaryLinks = [
   { label: 'Home', to: '/' },
   { label: 'Calendar', to: '/calendar' },
+  {
+    label: 'Karlie Lauf 2026',
+    to: '/karlie-lauf',
+  },
   { label: 'Results', to: '/results/2026' },
   // { label: 'Categories', to: '/categories' },
   // { label: 'Gallery', to: '/gallery' },

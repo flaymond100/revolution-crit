@@ -20,6 +20,7 @@ import {
   GalleryRacePage,
   GallerySeasonPage,
   ImprintPage,
+  KarlieLaufPage,
   PartnersPage,
   PrivacyPage,
   RaceDetailPage,
@@ -57,6 +58,7 @@ function App() {
         <Route element={<AppLayout />}>
           <Route element={<HomePage />} path="/" />
           <Route element={<RacesPage />} path="/calendar" />
+          <Route element={<KarlieLaufPage />} path="/karlie-lauf" />
           <Route element={<RaceDetailPage />} path="/calendar/:slug" />
           <Route element={<RaceRegistrationPage />} path="/calendar/:slug/register" />
           <Route element={<RegistrationSuccessPage />} path="/registration-success" />
