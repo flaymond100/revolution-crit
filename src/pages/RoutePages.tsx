@@ -45,7 +45,9 @@ function StatusBadge({ status }: { status: string | null }) {
   }
 
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${config.className}`}>
+    <span
+      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${config.className}`}
+    >
       {config.label}
     </span>
   );
@@ -242,16 +244,14 @@ export function RaceDetailPage({
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const { data: raceCalendarData = [], isLoading: isRaceCalendarLoading } = useQuery({
-    queryKey: ['race-calendar'],
-    queryFn: fetchRaceCalendars,
-    enabled: !fixedRaceId,
-  });
+  const { data: raceCalendarData = [], isLoading: isRaceCalendarLoading } =
+    useQuery({
+      queryKey: ['race-calendar'],
+      queryFn: fetchRaceCalendars,
+      enabled: !fixedRaceId,
+    });
 
-  const {
-    data: fixedRace,
-    isLoading: isFixedRaceLoading,
-  } = useQuery({
+  const { data: fixedRace, isLoading: isFixedRaceLoading } = useQuery({
     queryKey: ['race-calendar-by-id', raceId],
     queryFn: () => fetchRaceCalendarById(raceId ?? ''),
     enabled: Boolean(fixedRaceId && raceId),
@@ -297,7 +297,6 @@ export function RaceDetailPage({
     today.setHours(0, 0, 0, 0);
     return raceDate < today;
   }, [race?.raceDate]);
-
 
   const formattedDate = useMemo(() => {
     if (!race?.raceDate) {
@@ -613,11 +612,16 @@ export function RaceDetailPage({
                 >
                   <div className="flex flex-wrap items-baseline justify-between gap-3">
                     <h3 className="font-heading text-lg font-semibold text-(--text-primary-dark)">
-                      {resolveRaceCategoryLabel(subRace.name, raceCategoryLabels)}
+                      {resolveRaceCategoryLabel(
+                        subRace.name,
+                        raceCategoryLabels
+                      )}
                     </h3>
                     <span className="text-xs text-(--text-secondary-dark)">
                       {entries.length}{' '}
-                      {entries.length === 1 ? countLabelSingular : countLabelPlural}
+                      {entries.length === 1
+                        ? countLabelSingular
+                        : countLabelPlural}
                     </span>
                   </div>
 
@@ -713,7 +717,11 @@ export function ResultsPage() {
               </option>
             ))}
           </select>
-          <button className="cta-button px-5 py-2" onClick={handleGo} type="button">
+          <button
+            className="cta-button px-5 py-2"
+            onClick={handleGo}
+            type="button"
+          >
             View season
           </button>
         </div>
@@ -752,7 +760,10 @@ export function ResultsSeasonPage() {
         if (Number.isNaN(d.getTime())) return false;
         return d < today && d.getFullYear() === seasonYear;
       })
-      .sort((a, b) => new Date(b.raceDate).getTime() - new Date(a.raceDate).getTime());
+      .sort(
+        (a, b) =>
+          new Date(b.raceDate).getTime() - new Date(a.raceDate).getTime()
+      );
   }, [raceCalendar, seasonYear]);
 
   return (
@@ -766,7 +777,8 @@ export function ResultsSeasonPage() {
             </h1>
             <p className="mt-2 text-sm text-(--text-secondary-dark)">
               {pastRaces.length}{' '}
-              {pastRaces.length === 1 ? 'past race' : 'past races'} in this season.
+              {pastRaces.length === 1 ? 'past race' : 'past races'} in this
+              season.
             </p>
           </div>
           <Link className="ghost-button" to="/results">
@@ -873,9 +885,12 @@ export function ResultsRacePage() {
   );
 
   const sortedEntries = useMemo(() => {
-    const entries = (selectedSubRace?.entries ?? []).filter(e => e.fromResultsUpload);
+    const entries = (selectedSubRace?.entries ?? []).filter(
+      e => e.fromResultsUpload
+    );
     return [...entries].sort((a, b) => {
-      if (a.position !== null && b.position !== null) return a.position - b.position;
+      if (a.position !== null && b.position !== null)
+        return a.position - b.position;
       if (a.position !== null) return -1;
       if (b.position !== null) return 1;
       return 0;
@@ -911,7 +926,10 @@ export function ResultsRacePage() {
           <h1 className="mt-5 font-heading text-4xl font-semibold text-(--text-primary-dark) sm:text-5xl">
             Race not found
           </h1>
-          <Link className="cta-button mt-6 inline-flex" to={`/results/${season ?? ''}`}>
+          <Link
+            className="cta-button mt-6 inline-flex"
+            to={`/results/${season ?? ''}`}
+          >
             Back to season
           </Link>
         </div>
@@ -940,7 +958,10 @@ export function ResultsRacePage() {
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-(--border-dark) pb-5">
             <h2 className="font-heading text-2xl font-semibold text-(--text-primary-dark)">
               {selectedSubRace
-                ? resolveRaceCategoryLabel(selectedSubRace.name, raceCategoryLabels)
+                ? resolveRaceCategoryLabel(
+                    selectedSubRace.name,
+                    raceCategoryLabels
+                  )
                 : '—'}
             </h2>
             <select

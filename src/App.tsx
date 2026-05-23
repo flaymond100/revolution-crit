@@ -60,8 +60,14 @@ function App() {
           <Route element={<RacesPage />} path="/calendar" />
           <Route element={<KarlieLaufPage />} path="/karlie-lauf" />
           <Route element={<RaceDetailPage />} path="/calendar/:slug" />
-          <Route element={<RaceRegistrationPage />} path="/calendar/:slug/register" />
-          <Route element={<RegistrationSuccessPage />} path="/registration-success" />
+          <Route
+            element={<RaceRegistrationPage />}
+            path="/calendar/:slug/register"
+          />
+          <Route
+            element={<RegistrationSuccessPage />}
+            path="/registration-success"
+          />
           <Route
             element={
               <RequireAuth>
