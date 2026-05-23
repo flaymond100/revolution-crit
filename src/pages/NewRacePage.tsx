@@ -155,6 +155,7 @@ export function NewRacePage() {
             formState.externalRegistrationUrl.trim() || null,
           external_results_url: formState.externalResultsUrl.trim() || null,
           internal_registration: formState.internalRegistration,
+          site: import.meta.env.VITE_SITE_KEY as string,
         })
         .select('id')
         .single();

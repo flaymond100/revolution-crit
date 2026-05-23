@@ -157,10 +157,13 @@ const raceCalendarSelect = `
   )
 `;
 
+const SITE_KEY = import.meta.env.VITE_SITE_KEY as string;
+
 export async function fetchRaceCalendars(): Promise<RaceCalendar[]> {
   const { data, error } = await supabase
     .from('race_calendar')
     .select(raceCalendarSelect)
+    .eq('site', SITE_KEY)
     .order('race_date', { ascending: true });
 
   if (error) {
@@ -178,6 +181,7 @@ export async function fetchRaceCalendarById(
     .from('race_calendar')
     .select(raceCalendarSelect)
     .eq('id', id)
+    .eq('site', SITE_KEY)
     .maybeSingle();
 
   if (error) {
