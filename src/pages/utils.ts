@@ -77,3 +77,4 @@ export function validateForm(
 }
 
 export const EXCLUDED_RACE_ID = 'd1c51dd8-7981-4c32-a6b6-af7f36fe769e';
+export const HIGHLIGHT_RACE_ID = 'd71c1d76-d4be-49d7-9661-62817a5bb21e';

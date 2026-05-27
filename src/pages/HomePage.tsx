@@ -10,7 +10,7 @@ import { fetchRaceCalendars } from '../lib/raceCalendar';
 import { toRaceItems } from '../lib/racePresentation';
 import { RaceTable } from '../components/RaceTable';
 import { useMemo } from 'react';
-import { EXCLUDED_RACE_ID } from './utils';
+import { EXCLUDED_RACE_ID, HIGHLIGHT_RACE_ID } from './utils';
 import { sortRacesByDate } from './RoutePages';
 
 export function HomePage() {
@@ -35,17 +35,20 @@ export function HomePage() {
     createRaceCategoryLabelMap(raceCategories)
   );
 
-  const upcomingRace = (data ?? [])
-    .filter(r => {
-      const d = new Date(r.raceDate);
-      if (Number.isNaN(d.getTime())) return false;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      return d >= today;
-    })
-    .sort(
-      (a, b) => new Date(a.raceDate).getTime() - new Date(b.raceDate).getTime()
-    )[0];
+  const upcomingRace =
+    (data ?? []).find(r => r.id === HIGHLIGHT_RACE_ID) ??
+    (data ?? [])
+      .filter(r => {
+        const d = new Date(r.raceDate);
+        if (Number.isNaN(d.getTime())) return false;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return d >= today;
+      })
+      .sort(
+        (a, b) =>
+          new Date(a.raceDate).getTime() - new Date(b.raceDate).getTime()
+      )[0];
 
   const upcomingRaceCity = upcomingRace
     ? upcomingRace.location.split(',')[0]?.trim() || upcomingRace.location
@@ -58,6 +61,20 @@ export function HomePage() {
         year: 'numeric',
       }).format(new Date(upcomingRace.raceDate))
     : 'Date TBA';
+
+  const lowestPriceCents = upcomingRace
+    ? (upcomingRace.subRaces ?? [])
+        .map(s => s.activePriceCents)
+        .filter((p): p is number => p !== null)
+        .sort((a, b) => a - b)[0] ?? null
+    : null;
+
+  const registeredCount = upcomingRace
+    ? (upcomingRace.subRaces ?? []).reduce(
+        (sum, s) => sum + (s.entries ?? []).length,
+        0
+      )
+    : 0;
 
   return (
     <>
@@ -125,28 +142,56 @@ export function HomePage() {
 
             <div className="grid gap-4 self-end">
               <div className="hero-highlight-card rounded-[1.75rem] border border-(--border-dark) p-5 sm:p-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.26em] text-(--accent-secondary)">
-                  Upcoming Highlight
-                </p>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.26em] text-(--accent-secondary)">
+                    Featured Race
+                  </p>
+                  {upcomingRace &&
+                    (upcomingRace.internalRegistration ||
+                      upcomingRace.externalRegistrationUrl) && (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/15 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wider text-green-400">
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-400" />
+                        Registration Open
+                      </span>
+                    )}
+                </div>
+
                 <h2 className="mt-3 font-heading text-2xl font-semibold text-(--text-primary-dark)">
                   {upcomingRace?.name ?? 'No upcoming races'}
                 </h2>
-                <p className="mt-3 text-sm leading-6 text-(--text-secondary-dark)">
-                  {upcomingRace
-                    ? `Highlighted event in ${upcomingRaceCity}. Explore category blocks and participant data from the race detail page.`
-                    : 'New races will be announced here when scheduled.'}
-                </p>
-                <div className="mt-5 flex flex-wrap gap-2">
+
+                {upcomingRace?.description && (
+                  <p className="mt-2 line-clamp-3 text-sm leading-6 text-(--text-secondary-dark)">
+                    {upcomingRace.description}
+                  </p>
+                )}
+
+                <div className="mt-4 flex flex-wrap gap-2">
                   <span className="filter-chip">{promotedRaceDate}</span>
                   <span className="filter-chip">
                     {upcomingRaceCity ?? 'Location TBA'}
                   </span>
+                  {lowestPriceCents !== null && (
+                    <span className="filter-chip">
+                      From €{(lowestPriceCents / 100).toFixed(0)}
+                    </span>
+                  )}
                 </div>
+
+                {registeredCount > 0 && (
+                  <p className="mt-3 text-xs text-(--text-secondary-dark)">
+                    <span className="font-semibold text-(--text-primary-dark)">
+                      {registeredCount}
+                    </span>{' '}
+                    {registeredCount === 1 ? 'rider' : 'riders'} already
+                    registered
+                  </p>
+                )}
 
                 {upcomingRace &&
                 (upcomingRace.internalRegistration ||
                   upcomingRace.externalRegistrationUrl) ? (
-                  <div className="mt-5">
+                  <div className="mt-5 flex flex-col gap-2">
                     {upcomingRace.internalRegistration ? (
                       <Link
                         className="cta-button w-full justify-center"
@@ -163,8 +208,25 @@ export function HomePage() {
                         Register Now
                       </Link>
                     )}
+                    <Link
+                      className="ghost-button w-full justify-center"
+                      to={`/calendar/${upcomingRace.id}`}
+                    >
+                      View Race Details
+                    </Link>
                   </div>
-                ) : null}
+                ) : (
+                  upcomingRace && (
+                    <div className="mt-5">
+                      <Link
+                        className="ghost-button w-full justify-center"
+                        to={`/calendar/${upcomingRace.id}`}
+                      >
+                        View Race Details
+                      </Link>
+                    </div>
+                  )
+                )}
               </div>
 
               {/* <div className="grid gap-4 sm:grid-cols-2">
