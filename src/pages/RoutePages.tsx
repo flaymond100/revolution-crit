@@ -14,9 +14,7 @@ import { fetchRaceCalendarById, fetchRaceCalendars } from '../lib/raceCalendar';
 import { toRaceItems } from '../lib/racePresentation';
 import { supabase } from '../lib/supabase';
 import type { RaceCalendar } from '../types';
-
-const EXCLUDED_RACE_ID = 'd1c51dd8-7981-4c32-a6b6-af7f36fe769e';
-const KARLIE_LAUF_RACE_ID = 'd1c51dd8-7981-4c32-a6b6-af7f36fe769e';
+import { EXCLUDED_RACE_ID } from './utils';
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   finished: {
@@ -53,7 +51,7 @@ function StatusBadge({ status }: { status: string | null }) {
   );
 }
 
-function sortRacesByDate(races: RaceCalendar[]): RaceCalendar[] {
+export function sortRacesByDate(races: RaceCalendar[]): RaceCalendar[] {
   return [...races].sort((a, b) => {
     const dateA = new Date(a.raceDate).getTime();
     const dateB = new Date(b.raceDate).getTime();
@@ -673,7 +671,7 @@ export function RaceDetailPage({
 export function KarlieLaufPage() {
   return (
     <RaceDetailPage
-      fixedRaceId={KARLIE_LAUF_RACE_ID}
+      fixedRaceId={EXCLUDED_RACE_ID}
       countLabelSingular="participant"
       countLabelPlural="participants"
       registeredLabel="Registered participants"

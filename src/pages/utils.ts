@@ -75,3 +75,5 @@ export function validateForm(
 
   return errors;
 }
+
+export const EXCLUDED_RACE_ID = 'd1c51dd8-7981-4c32-a6b6-af7f36fe769e';
