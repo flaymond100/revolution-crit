@@ -629,7 +629,12 @@ export function RaceDetailPage({
                     </p>
                   ) : (
                     <div className="mt-4 overflow-x-auto">
-                      <table className="w-full text-left text-sm">
+                      <table className="min-w-140 w-full table-fixed text-left text-sm">
+                        <colgroup>
+                          <col className="w-16" />
+                          <col className="w-[44%]" />
+                          <col className="w-[56%]" />
+                        </colgroup>
                         <thead>
                           <tr className="border-b border-(--border-dark) text-(--text-secondary-dark)">
                             <th className="px-3 py-2 font-medium">#</th>
