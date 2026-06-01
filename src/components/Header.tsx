@@ -8,7 +8,7 @@ const primaryLinks = [
   { label: 'Home', to: '/' },
   { label: 'Calendar', to: '/calendar' },
   {
-    label: 'Karlie Lauf 2026',
+    label: 'Karlie Lauf',
     to: '/karlie-lauf',
   },
   { label: 'Results', to: '/results/2026' },

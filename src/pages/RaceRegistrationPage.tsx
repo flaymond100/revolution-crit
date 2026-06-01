@@ -69,7 +69,7 @@ export function RaceRegistrationPage() {
 
       return {
         ...current,
-        startingClass: sortedSubRaces[0].id,
+        startingClass: '',
       };
     });
   }, [sortedSubRaces]);
@@ -337,6 +337,9 @@ export function RaceRegistrationPage() {
                 }
                 value={formState.startingClass}
               >
+                {sortedSubRaces.length > 0 ? (
+                  <option value="">Please select...</option>
+                ) : null}
                 {sortedSubRaces.length === 0 ? (
                   <option value="">No starting classes available</option>
                 ) : null}
