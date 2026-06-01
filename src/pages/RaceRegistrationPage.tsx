@@ -436,11 +436,6 @@ export function RaceRegistrationPage() {
                 €{(activePriceCents / 100).toFixed(2)}
               </span>
             </div>
-          ) : sortedSubRaces.length > 0 ? (
-            <div className="mt-6 rounded-2xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-              No price configured for this starting class. Contact the
-              organizers.
-            </div>
           ) : null}
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
