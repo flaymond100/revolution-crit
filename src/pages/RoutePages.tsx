@@ -673,7 +673,7 @@ export function RaceDetailPage({
   );
 }
 
-export function KarlieLaufPage() {
+export function KarliLaufPage() {
   return (
     <RaceDetailPage
       fixedRaceId={EXCLUDED_RACE_ID}
@@ -1144,9 +1144,9 @@ export function ContactPage() {
           Feel free to reach out by email at{' '}
           <a
             className="text-(--accent-secondary) underline underline-offset-4 transition hover:opacity-85"
-            href="mailto:kontakt@rsc-nordsachen.de"
+            href="mailto:kontakt@rsc-nordsachsen.de"
           >
-            kontakt@rsc-nordsachen.de
+            kontakt@rsc-nordsachsen.de
           </a>
         </>
       }

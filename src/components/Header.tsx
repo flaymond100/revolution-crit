@@ -8,8 +8,8 @@ const primaryLinks = [
   { label: 'Home', to: '/' },
   { label: 'Calendar', to: '/calendar' },
   {
-    label: 'Karlie Lauf',
-    to: '/karlie-lauf',
+    label: 'Karli Lauf',
+    to: '/Karli-lauf',
   },
   { label: 'Results', to: '/results/2026' },
   // { label: 'Categories', to: '/categories' },
