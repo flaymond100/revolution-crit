@@ -167,6 +167,10 @@ export function RaceRegistrationPage() {
     return <ErrorSection />;
   }
 
+  if (!race.internalRegistration) {
+    return <ForbiddenSection />;
+  }
+
   return (
     <section className="page-shell">
       {/* <div className="surface-panel overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(255,90,54,0.18),transparent_28%),radial-gradient(circle_at_top_right,rgba(0,212,255,0.16),transparent_34%),linear-gradient(145deg,rgba(18,25,35,0.96),rgba(11,15,20,0.98))] px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
@@ -526,6 +530,29 @@ const Loader = () => (
             className="h-20 animate-pulse rounded-3xl bg-white/6"
           />
         ))}
+      </div>
+    </div>
+  </section>
+);
+
+const ForbiddenSection = () => (
+  <section className="page-shell">
+    <div className="surface-panel p-8 text-center sm:p-10">
+      <span className="eyebrow">Registration</span>
+      <h1 className="mt-5 font-heading text-4xl font-semibold text-(--text-primary-dark) sm:text-5xl">
+        Registration is closed.
+      </h1>
+      <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-(--text-secondary-dark)">
+        Registration for this race is not currently open. Please check the race
+        page for the latest status.
+      </p>
+      <div className="mx-auto mt-8 flex max-w-sm flex-col gap-3 sm:flex-row sm:justify-center">
+        <Link className="cta-button w-full justify-center" to="/calendar">
+          Back to races
+        </Link>
+        <Link className="ghost-button w-full justify-center" to="/contact">
+          Contact organizers
+        </Link>
       </div>
     </div>
   </section>
