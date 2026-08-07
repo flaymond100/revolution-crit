@@ -593,7 +593,7 @@ export function RaceDetailPage({
         ) : null}
       </div>
 
-      {race.internalRegistration && sortedSubRaces.length > 0 ? (
+      {sortedSubRaces.length > 0 ? (
         <div id="results" className="surface-panel p-6 sm:p-8 scroll-mt-24">
           <span className="eyebrow">Participants</span>
           <h2 className="mt-3 font-heading text-2xl font-semibold text-(--text-primary-dark) sm:text-3xl">
