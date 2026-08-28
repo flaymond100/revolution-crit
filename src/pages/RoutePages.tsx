@@ -296,6 +296,13 @@ export function RaceDetailPage({
     return raceDate < today;
   }, [race?.raceDate]);
 
+  useEffect(() => {
+    if (!race || !isPast) return;
+    navigate(`/results/${new Date(race.raceDate).getFullYear()}/${race.id}`, {
+      replace: true,
+    });
+  }, [race, isPast, navigate]);
+
   const formattedDate = useMemo(() => {
     if (!race?.raceDate) {
       return 'TBA';
