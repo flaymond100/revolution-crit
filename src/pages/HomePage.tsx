@@ -13,6 +13,9 @@ import { useMemo } from 'react';
 import { EXCLUDED_RACE_ID, HIGHLIGHT_RACE_ID } from './utils';
 import { sortRacesByDate } from './RoutePages';
 
+// Featured race card is hidden between seasons.
+const SHOW_FEATURED_RACE = false;
+
 export function HomePage() {
   const { data, isLoading } = useQuery({
     queryKey: ['race-calendar'],
@@ -63,10 +66,10 @@ export function HomePage() {
     : 'Date TBA';
 
   const lowestPriceCents = upcomingRace
-    ? (upcomingRace.subRaces ?? [])
+    ? ((upcomingRace.subRaces ?? [])
         .map(s => s.activePriceCents)
         .filter((p): p is number => p !== null)
-        .sort((a, b) => a - b)[0] ?? null
+        .sort((a, b) => a - b)[0] ?? null)
     : null;
 
   const registeredCount = upcomingRace
@@ -88,7 +91,13 @@ export function HomePage() {
 
       <div className="page-shell">
         <section className="hero-grid home-hero-section overflow-hidden rounded-4xl border border-(--border-dark) px-6 py-8 sm:px-10 sm:py-12 lg:px-7 lg:py-8">
-          <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:gap-8">
+          <div
+            className={
+              SHOW_FEATURED_RACE
+                ? 'grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:gap-8'
+                : 'grid gap-6'
+            }
+          >
             <div className="relative">
               <h1 className="mt-5 max-w-3xl font-heading text-4xl font-semibold leading-[1.02] text-(--text-primary-dark) sm:text-5xl lg:text-7xl">
                 We want to
@@ -140,84 +149,77 @@ export function HomePage() {
             </dl> */}
             </div>
 
-            <div className="grid gap-4 self-end">
-              <div className="hero-highlight-card rounded-[1.75rem] border border-(--border-dark) p-5 sm:p-6">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.26em] text-(--accent-secondary)">
-                    Featured Race
-                  </p>
-                  {upcomingRace &&
-                    (upcomingRace.internalRegistration ||
-                      upcomingRace.externalRegistrationUrl) && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/15 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wider text-green-400">
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-400" />
-                        Registration Open
+            {SHOW_FEATURED_RACE && (
+              <div className="grid gap-4 self-end">
+                <div className="hero-highlight-card rounded-[1.75rem] border border-(--border-dark) p-5 sm:p-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.26em] text-(--accent-secondary)">
+                      Featured Race
+                    </p>
+                    {upcomingRace &&
+                      (upcomingRace.internalRegistration ||
+                        upcomingRace.externalRegistrationUrl) && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/15 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wider text-green-400">
+                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-400" />
+                          Registration Open
+                        </span>
+                      )}
+                  </div>
+
+                  <h2 className="mt-3 font-heading text-2xl font-semibold text-(--text-primary-dark)">
+                    {upcomingRace?.name ?? 'No upcoming races'}
+                  </h2>
+
+                  {upcomingRace?.description && (
+                    <p className="mt-2 line-clamp-3 text-sm leading-6 text-(--text-secondary-dark)">
+                      {upcomingRace.description}
+                    </p>
+                  )}
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="filter-chip">{promotedRaceDate}</span>
+                    <span className="filter-chip">
+                      {upcomingRaceCity ?? 'Location TBA'}
+                    </span>
+                    {lowestPriceCents !== null && (
+                      <span className="filter-chip">
+                        From €{(lowestPriceCents / 100).toFixed(0)}
                       </span>
                     )}
-                </div>
-
-                <h2 className="mt-3 font-heading text-2xl font-semibold text-(--text-primary-dark)">
-                  {upcomingRace?.name ?? 'No upcoming races'}
-                </h2>
-
-                {upcomingRace?.description && (
-                  <p className="mt-2 line-clamp-3 text-sm leading-6 text-(--text-secondary-dark)">
-                    {upcomingRace.description}
-                  </p>
-                )}
-
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <span className="filter-chip">{promotedRaceDate}</span>
-                  <span className="filter-chip">
-                    {upcomingRaceCity ?? 'Location TBA'}
-                  </span>
-                  {lowestPriceCents !== null && (
-                    <span className="filter-chip">
-                      From €{(lowestPriceCents / 100).toFixed(0)}
-                    </span>
-                  )}
-                </div>
-
-                {registeredCount > 0 && (
-                  <p className="mt-3 text-xs text-(--text-secondary-dark)">
-                    <span className="font-semibold text-(--text-primary-dark)">
-                      {registeredCount}
-                    </span>{' '}
-                    {registeredCount === 1 ? 'rider' : 'riders'} already
-                    registered
-                  </p>
-                )}
-
-                {upcomingRace &&
-                (upcomingRace.internalRegistration ||
-                  upcomingRace.externalRegistrationUrl) ? (
-                  <div className="mt-5 flex flex-col gap-2">
-                    {upcomingRace.internalRegistration ? (
-                      <Link
-                        className="cta-button w-full justify-center"
-                        to={`/calendar/${upcomingRace.id}/register`}
-                      >
-                        Register Now
-                      </Link>
-                    ) : (
-                      <Link
-                        className="cta-button w-full justify-center"
-                        target="_blank"
-                        to={upcomingRace.externalRegistrationUrl ?? '/calendar'}
-                      >
-                        Register Now
-                      </Link>
-                    )}
-                    <Link
-                      className="ghost-button w-full justify-center"
-                      to={`/calendar/${upcomingRace.id}`}
-                    >
-                      View Race Details
-                    </Link>
                   </div>
-                ) : (
-                  upcomingRace && (
-                    <div className="mt-5">
+
+                  {registeredCount > 0 && (
+                    <p className="mt-3 text-xs text-(--text-secondary-dark)">
+                      <span className="font-semibold text-(--text-primary-dark)">
+                        {registeredCount}
+                      </span>{' '}
+                      {registeredCount === 1 ? 'rider' : 'riders'} already
+                      registered
+                    </p>
+                  )}
+
+                  {upcomingRace &&
+                  (upcomingRace.internalRegistration ||
+                    upcomingRace.externalRegistrationUrl) ? (
+                    <div className="mt-5 flex flex-col gap-2">
+                      {upcomingRace.internalRegistration ? (
+                        <Link
+                          className="cta-button w-full justify-center"
+                          to={`/calendar/${upcomingRace.id}/register`}
+                        >
+                          Register Now
+                        </Link>
+                      ) : (
+                        <Link
+                          className="cta-button w-full justify-center"
+                          target="_blank"
+                          to={
+                            upcomingRace.externalRegistrationUrl ?? '/calendar'
+                          }
+                        >
+                          Register Now
+                        </Link>
+                      )}
                       <Link
                         className="ghost-button w-full justify-center"
                         to={`/calendar/${upcomingRace.id}`}
@@ -225,11 +227,21 @@ export function HomePage() {
                         View Race Details
                       </Link>
                     </div>
-                  )
-                )}
-              </div>
+                  ) : (
+                    upcomingRace && (
+                      <div className="mt-5">
+                        <Link
+                          className="ghost-button w-full justify-center"
+                          to={`/calendar/${upcomingRace.id}`}
+                        >
+                          View Race Details
+                        </Link>
+                      </div>
+                    )
+                  )}
+                </div>
 
-              {/* <div className="grid gap-4 sm:grid-cols-2">
+                {/* <div className="grid gap-4 sm:grid-cols-2">
               <article className="surface-panel p-5">
                 <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-(--accent-secondary)">Latest result</p>
                 <h3 className="mt-3 font-heading text-xl font-semibold text-(--text-primary-dark)">2025 winners live here</h3>
@@ -241,6 +253,33 @@ export function HomePage() {
                 <p className="mt-2 text-sm leading-6 text-(--text-secondary-dark)">Visual storytelling stays structured and easy to browse on small screens.</p>
               </article>
             </div> */}
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section
+          className="secondary-cta-panel overflow-hidden rounded-4xl border border-(--border-dark) px-6 py-8 sm:px-8 sm:py-10 lg:px-10"
+          aria-label="Season 2026 wrap-up"
+        >
+          <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+            <div>
+              <span className="eyebrow">Season 2026</span>
+              <h2 className="mt-4 font-heading text-3xl font-semibold text-(--text-primary-dark) sm:text-4xl">
+                Thank You for an Amazing 2026 Season!
+              </h2>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-(--text-secondary-dark)">
+                A huge thank you to every rider, volunteer, partner and
+                spectator who made this season unforgettable. Registration for
+                2026 is now closed, but we are already planning what comes next.
+                See you on the start line in 2027!
+              </p>
+            </div>
+
+            <div className="grid gap-3">
+              <Link className="cta-button w-full justify-center" to="/results">
+                See 2026 Results
+              </Link>
             </div>
           </div>
         </section>
